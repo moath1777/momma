@@ -619,7 +619,7 @@
       "element": "الأهداف ومؤشرات الأداء",
       "weight": 15,
       "verification": 23.93,
-      "earnedWeight": 3.5895
+      "earnedWeight": 3.5894999999999997
     },
     {
       "id": "E21",
@@ -663,7 +663,7 @@
       "element": "الإجراءات",
       "weight": 5,
       "verification": 33.51,
-      "earnedWeight": 1.6755
+      "earnedWeight": 1.6754999999999998
     },
     {
       "id": "E25",
@@ -817,7 +817,7 @@
       "element": "الأهداف ومؤشرات الأداء",
       "weight": 15,
       "verification": 18.64,
-      "earnedWeight": 2.796
+      "earnedWeight": 2.7960000000000003
     },
     {
       "id": "E39",
@@ -828,7 +828,7 @@
       "element": "الحوكمة",
       "weight": 15,
       "verification": 25.21,
-      "earnedWeight": 3.7815
+      "earnedWeight": 3.7815000000000003
     },
     {
       "id": "E40",
@@ -850,7 +850,7 @@
       "element": "الموارد",
       "weight": 20,
       "verification": 91.41,
-      "earnedWeight": 18.282
+      "earnedWeight": 18.281999999999996
     },
     {
       "id": "E42",
@@ -861,7 +861,7 @@
       "element": "الإجراءات",
       "weight": 5,
       "verification": 67.79,
-      "earnedWeight": 3.3895
+      "earnedWeight": 3.3895000000000004
     },
     {
       "id": "E43",
@@ -1224,7 +1224,7 @@
       "element": "الحوكمة",
       "weight": 15,
       "verification": 17.36,
-      "earnedWeight": 2.604
+      "earnedWeight": 2.6039999999999996
     },
     {
       "id": "E76",
@@ -1235,7 +1235,7 @@
       "element": "التنظيم",
       "weight": 20,
       "verification": 1.67,
-      "earnedWeight": 0.334
+      "earnedWeight": 0.33399999999999996
     },
     {
       "id": "E77",
@@ -1257,7 +1257,7 @@
       "element": "الإجراءات",
       "weight": 5,
       "verification": 57.19,
-      "earnedWeight": 2.8595
+      "earnedWeight": 2.8594999999999997
     },
     {
       "id": "E79",
@@ -1444,7 +1444,7 @@
       "element": "الموارد",
       "weight": 20,
       "verification": 75.48,
-      "earnedWeight": 15.096
+      "earnedWeight": 15.096000000000002
     },
     {
       "id": "E96",
@@ -1455,7 +1455,7 @@
       "element": "الإجراءات",
       "weight": 5,
       "verification": 62.86,
-      "earnedWeight": 3.143
+      "earnedWeight": 3.1430000000000002
     },
     {
       "id": "E97",
@@ -1807,7 +1807,7 @@
       "element": "الأهداف ومؤشرات الأداء",
       "weight": 15,
       "verification": 66.56,
-      "earnedWeight": 9.984
+      "earnedWeight": 9.984000000000002
     },
     {
       "id": "E129",
@@ -1818,7 +1818,7 @@
       "element": "الحوكمة",
       "weight": 15,
       "verification": 30.09,
-      "earnedWeight": 4.5135
+      "earnedWeight": 4.5135000000000005
     },
     {
       "id": "E130",
@@ -1829,7 +1829,7 @@
       "element": "التنظيم",
       "weight": 20,
       "verification": 17.87,
-      "earnedWeight": 3.574
+      "earnedWeight": 3.5740000000000003
     },
     {
       "id": "E131",
@@ -2016,7 +2016,7 @@
       "element": "الحوكمة",
       "weight": 15,
       "verification": 65.74,
-      "earnedWeight": 9.861
+      "earnedWeight": 9.860999999999999
     },
     {
       "id": "E148",
@@ -2027,7 +2027,7 @@
       "element": "التنظيم",
       "weight": 20,
       "verification": 24.12,
-      "earnedWeight": 4.824
+      "earnedWeight": 4.824000000000001
     },
     {
       "id": "E149",
@@ -2434,7 +2434,7 @@
       "element": "الموارد",
       "weight": 20,
       "verification": 1.48,
-      "earnedWeight": 0.296
+      "earnedWeight": 0.29600000000000004
     },
     {
       "id": "E186",
@@ -2621,7 +2621,7 @@
       "element": "التنظيم",
       "weight": 20,
       "verification": 46.98,
-      "earnedWeight": 9.396
+      "earnedWeight": 9.395999999999999
     },
     {
       "id": "E203",
@@ -2797,7 +2797,7 @@
       "element": "الأهداف ومؤشرات الأداء",
       "weight": 15,
       "verification": 55.12,
-      "earnedWeight": 8.268
+      "earnedWeight": 8.267999999999999
     },
     {
       "id": "E219",
@@ -3006,7 +3006,7 @@
       "element": "الحوكمة",
       "weight": 15,
       "verification": 12.88,
-      "earnedWeight": 1.932
+      "earnedWeight": 1.9320000000000002
     },
     {
       "id": "E238",
@@ -3017,7 +3017,7 @@
       "element": "التنظيم",
       "weight": 20,
       "verification": 59.53,
-      "earnedWeight": 11.906
+      "earnedWeight": 11.905999999999999
     },
     {
       "id": "E239",
