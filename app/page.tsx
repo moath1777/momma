@@ -236,7 +236,9 @@ export default function Home() {
       setOpenFilter(null);
     }}>
       <header className="topbar">
-        <div className="brand-mark" aria-hidden="true">ن</div>
+        <div className="brand-logo">
+          <img src="/mngdp-logo.png" alt="برنامج تطوير وزارة الحرس الوطني" />
+        </div>
         <div className="title-block">
           <p>لوحة الأداء المؤسسي</p>
           <h1>قياس نضج النموذج التشغيلي</h1>

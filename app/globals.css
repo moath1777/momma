@@ -45,17 +45,27 @@ button, a { -webkit-tap-highlight-color: transparent; }
   gap: 14px;
 }
 
-.brand-mark {
-  width: 48px;
-  height: 48px;
-  display: grid;
-  place-items: center;
-  border-radius: 15px 15px 5px 15px;
-  background: var(--green);
-  color: white;
-  font-size: 25px;
-  font-weight: 800;
-  box-shadow: 0 10px 22px rgba(31,110,67,.18);
+.brand-logo {
+  width: clamp(210px, 19vw, 285px);
+  height: 58px;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  overflow: hidden;
+  padding: 3px 8px;
+  border: 1px solid rgba(183, 151, 83, .22);
+  border-radius: 13px;
+  background: rgba(255,255,255,.82);
+  box-shadow: 0 10px 24px rgba(31,110,67,.07);
+}
+
+.brand-logo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: right center;
 }
 
 .title-block { min-width: 250px; }
@@ -197,7 +207,8 @@ button, a { -webkit-tap-highlight-color: transparent; }
 @media (max-width: 620px) {
   .dashboard-shell { padding: 9px; gap: 7px; grid-template-rows: auto minmax(130px, 23vh) minmax(0, 1fr); }
   .topbar { min-height: 45px; gap: 8px; }
-  .brand-mark { width: 38px; height: 38px; border-radius: 11px 11px 4px 11px; font-size: 20px; }
+  .brand-logo { width: 46px; height: 42px; padding: 2px; border-radius: 11px; justify-content: flex-start; }
+  .brand-logo img { width: auto; max-width: none; height: 100%; object-fit: contain; object-position: right center; }
   .title-block { min-width: 0; }
   .title-block p { display: none; }
   .title-block h1 { font-size: clamp(14px, 4.5vw, 19px); }
@@ -232,7 +243,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
 @media (max-height: 680px) and (min-width: 621px) {
   .dashboard-shell { padding-block: 9px; gap: 7px; grid-template-rows: auto auto minmax(145px, 25vh) minmax(0,1fr); }
   .topbar { min-height: 45px; }
-  .brand-mark { width: 40px; height: 40px; }
+  .brand-logo { height: 46px; }
   .filter-strip { padding-block: 5px; }
   .stage-card { padding-block: 9px; }
   .stage-card-main { min-height: 74px; }
