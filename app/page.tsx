@@ -301,7 +301,7 @@ export default function Home() {
         })}
       </section>
 
-      <section className="analysis-panel">
+      <section className={`analysis-panel ${stageMeta[activeStage].className}`}>
         <div className="analysis-head">
           <div>
             <p>تفصيل المرحلة المختارة</p>
