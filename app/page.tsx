@@ -262,8 +262,10 @@ export default function Home() {
         </button>
       </section>
 
-      <section className="stage-grid" aria-label="مؤشرات المراحل">
-        {stages.map((stage) => {
+      <section className="stage-section" aria-labelledby="stages-title">
+        <h2 className="stages-title" id="stages-title">مراحل قياس مستوى نضج النموذج التشغيلي</h2>
+        <div className="stage-grid">
+          {stages.map((stage) => {
           const value = metrics[stage];
           const meta = stageMeta[stage];
           return (
@@ -292,7 +294,8 @@ export default function Home() {
               <div className="stage-track"><i style={{ width: `${value ?? 0}%` }} /></div>
             </button>
           );
-        })}
+          })}
+        </div>
       </section>
 
       {!allFiltersSelected && <section className={`analysis-panel ${stageMeta[activeStage].className}`}>

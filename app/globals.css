@@ -129,6 +129,8 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .reset-button { border: 0; border-radius: 9px; padding: 9px 10px; background: #eef5f1; color: var(--green-dark); font-size: 10px; font-weight: 800; cursor: pointer; white-space: nowrap; }
 .reset-button:disabled { opacity: .38; cursor: default; }
 
+.stage-section { min-height: 0; display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 7px; }
+.stages-title { margin: 0; color: var(--ink); font-size: clamp(13px, 1.15vw, 17px); font-weight: 900; }
 .stage-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(9px, 1vw, 15px); min-height: 0; }
 .stage-card { --accent: var(--green); position: relative; border: 1px solid var(--line); background: rgba(255,255,255,.93); border-radius: 19px; padding: clamp(12px, 1.5vw, 20px); text-align: right; cursor: pointer; overflow: hidden; box-shadow: 0 12px 35px rgba(23,52,41,.055); transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease; }
 .stage-card::before { content: ""; position: absolute; width: 150px; height: 150px; border-radius: 50%; background: color-mix(in srgb, var(--accent) 8%, transparent); left: -70px; top: -80px; }
@@ -219,6 +221,8 @@ button, a { -webkit-tap-highlight-color: transparent; }
   .title-block h1 { font-size: clamp(14px, 4.5vw, 19px); }
   .download-link { display: none; }
   .mobile-filter-button { padding: 8px 9px; font-size: 9px; }
+  .stage-section { gap: 4px; }
+  .stages-title { font-size: 11px; }
   .stage-grid { gap: 6px; }
   .stage-card { border-radius: 13px; padding: 7px; }
   .stage-card-head { height: 17px; }
