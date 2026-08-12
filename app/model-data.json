@@ -409,8 +409,8 @@
       "stage": "التصميم",
       "element": "الدور",
       "weight": 25,
-      "verification": 74.65,
-      "earnedWeight": 18.6625
+      "verification": 74.7,
+      "earnedWeight": 18.675
     },
     {
       "id": "E02",
@@ -420,8 +420,8 @@
       "stage": "التصميم",
       "element": "الأهداف ومؤشرات الأداء",
       "weight": 15,
-      "verification": 89.99,
-      "earnedWeight": 13.4985
+      "verification": 90,
+      "earnedWeight": 13.5
     },
     {
       "id": "E03",
@@ -442,8 +442,8 @@
       "stage": "التصميم",
       "element": "التنظيم",
       "weight": 20,
-      "verification": 3.35,
-      "earnedWeight": 0.67
+      "verification": 90,
+      "earnedWeight": 18
     },
     {
       "id": "E05",
@@ -453,8 +453,8 @@
       "stage": "التصميم",
       "element": "الموارد",
       "weight": 20,
-      "verification": 14.66,
-      "earnedWeight": 2.932
+      "verification": 90,
+      "earnedWeight": 18
     },
     {
       "id": "E06",
@@ -464,8 +464,8 @@
       "stage": "التصميم",
       "element": "الإجراءات",
       "weight": 5,
-      "verification": 43.09,
-      "earnedWeight": 2.1545
+      "verification": 90,
+      "earnedWeight": 4.5
     },
     {
       "id": "E07",
@@ -607,8 +607,8 @@
       "stage": "التصميم",
       "element": "الدور",
       "weight": 25,
-      "verification": 25.93,
-      "earnedWeight": 6.4825
+      "verification": 25.9,
+      "earnedWeight": 6.475
     },
     {
       "id": "E20",
@@ -618,8 +618,8 @@
       "stage": "التصميم",
       "element": "الأهداف ومؤشرات الأداء",
       "weight": 15,
-      "verification": 23.93,
-      "earnedWeight": 3.5894999999999997
+      "verification": 25.9,
+      "earnedWeight": 3.885
     },
     {
       "id": "E21",
@@ -629,8 +629,8 @@
       "stage": "التصميم",
       "element": "الحوكمة",
       "weight": 15,
-      "verification": 29.17,
-      "earnedWeight": 4.3755
+      "verification": 25.9,
+      "earnedWeight": 3.885
     },
     {
       "id": "E22",
@@ -640,8 +640,8 @@
       "stage": "التصميم",
       "element": "التنظيم",
       "weight": 20,
-      "verification": 25.33,
-      "earnedWeight": 5.066
+      "verification": 25.9,
+      "earnedWeight": 5.18
     },
     {
       "id": "E23",
@@ -651,8 +651,8 @@
       "stage": "التصميم",
       "element": "الموارد",
       "weight": 20,
-      "verification": 4.8,
-      "earnedWeight": 0.96
+      "verification": 25.9,
+      "earnedWeight": 5.18
     },
     {
       "id": "E24",
@@ -662,8 +662,8 @@
       "stage": "التصميم",
       "element": "الإجراءات",
       "weight": 5,
-      "verification": 33.51,
-      "earnedWeight": 1.6754999999999998
+      "verification": 25.9,
+      "earnedWeight": 1.295
     },
     {
       "id": "E25",
@@ -805,8 +805,8 @@
       "stage": "التصميم",
       "element": "الدور",
       "weight": 25,
-      "verification": 60.26,
-      "earnedWeight": 15.065
+      "verification": 60.3,
+      "earnedWeight": 15.075
     },
     {
       "id": "E38",
@@ -816,8 +816,8 @@
       "stage": "التصميم",
       "element": "الأهداف ومؤشرات الأداء",
       "weight": 15,
-      "verification": 18.64,
-      "earnedWeight": 2.7960000000000003
+      "verification": 60.3,
+      "earnedWeight": 9.045
     },
     {
       "id": "E39",
@@ -827,8 +827,8 @@
       "stage": "التصميم",
       "element": "الحوكمة",
       "weight": 15,
-      "verification": 25.21,
-      "earnedWeight": 3.7815000000000003
+      "verification": 60.3,
+      "earnedWeight": 9.045
     },
     {
       "id": "E40",
@@ -838,8 +838,8 @@
       "stage": "التصميم",
       "element": "التنظيم",
       "weight": 20,
-      "verification": 99.6,
-      "earnedWeight": 19.92
+      "verification": 60.3,
+      "earnedWeight": 12.06
     },
     {
       "id": "E41",
@@ -849,8 +849,8 @@
       "stage": "التصميم",
       "element": "الموارد",
       "weight": 20,
-      "verification": 91.41,
-      "earnedWeight": 18.281999999999996
+      "verification": 60.3,
+      "earnedWeight": 12.06
     },
     {
       "id": "E42",
@@ -860,8 +860,8 @@
       "stage": "التصميم",
       "element": "الإجراءات",
       "weight": 5,
-      "verification": 67.79,
-      "earnedWeight": 3.3895000000000004
+      "verification": 60.3,
+      "earnedWeight": 3.015
     },
     {
       "id": "E43",
@@ -1003,8 +1003,8 @@
       "stage": "التصميم",
       "element": "الدور",
       "weight": 25,
-      "verification": 37.25,
-      "earnedWeight": 9.3125
+      "verification": 37.3,
+      "earnedWeight": 9.325
     },
     {
       "id": "E56",
@@ -1014,8 +1014,8 @@
       "stage": "التصميم",
       "element": "الأهداف ومؤشرات الأداء",
       "weight": 15,
-      "verification": 98.67,
-      "earnedWeight": 14.8005
+      "verification": 37.3,
+      "earnedWeight": 5.595
     },
     {
       "id": "E57",
@@ -1025,8 +1025,8 @@
       "stage": "التصميم",
       "element": "الحوكمة",
       "weight": 15,
-      "verification": 19.15,
-      "earnedWeight": 2.8725
+      "verification": 37.3,
+      "earnedWeight": 5.595
     },
     {
       "id": "E58",
@@ -1036,8 +1036,8 @@
       "stage": "التصميم",
       "element": "التنظيم",
       "weight": 20,
-      "verification": 98.37,
-      "earnedWeight": 19.674
+      "verification": 37.3,
+      "earnedWeight": 7.46
     },
     {
       "id": "E59",
@@ -1047,8 +1047,8 @@
       "stage": "التصميم",
       "element": "الموارد",
       "weight": 20,
-      "verification": 25.45,
-      "earnedWeight": 5.09
+      "verification": 37.3,
+      "earnedWeight": 7.46
     },
     {
       "id": "E60",
@@ -1058,8 +1058,8 @@
       "stage": "التصميم",
       "element": "الإجراءات",
       "weight": 5,
-      "verification": 17.83,
-      "earnedWeight": 0.8915
+      "verification": 37.3,
+      "earnedWeight": 1.865
     },
     {
       "id": "E61",
@@ -1201,8 +1201,8 @@
       "stage": "التصميم",
       "element": "الدور",
       "weight": 25,
-      "verification": 65.92,
-      "earnedWeight": 16.48
+      "verification": 65.9,
+      "earnedWeight": 16.475
     },
     {
       "id": "E74",
@@ -1212,8 +1212,8 @@
       "stage": "التصميم",
       "element": "الأهداف ومؤشرات الأداء",
       "weight": 15,
-      "verification": 11.7,
-      "earnedWeight": 1.755
+      "verification": 65.9,
+      "earnedWeight": 9.885
     },
     {
       "id": "E75",
@@ -1223,8 +1223,8 @@
       "stage": "التصميم",
       "element": "الحوكمة",
       "weight": 15,
-      "verification": 17.36,
-      "earnedWeight": 2.6039999999999996
+      "verification": 65.9,
+      "earnedWeight": 9.885
     },
     {
       "id": "E76",
@@ -1234,8 +1234,8 @@
       "stage": "التصميم",
       "element": "التنظيم",
       "weight": 20,
-      "verification": 1.67,
-      "earnedWeight": 0.33399999999999996
+      "verification": 65.9,
+      "earnedWeight": 13.18
     },
     {
       "id": "E77",
@@ -1245,8 +1245,8 @@
       "stage": "التصميم",
       "element": "الموارد",
       "weight": 20,
-      "verification": 86.15,
-      "earnedWeight": 17.23
+      "verification": 65.9,
+      "earnedWeight": 13.18
     },
     {
       "id": "E78",
@@ -1256,8 +1256,8 @@
       "stage": "التصميم",
       "element": "الإجراءات",
       "weight": 5,
-      "verification": 57.19,
-      "earnedWeight": 2.8594999999999997
+      "verification": 65.9,
+      "earnedWeight": 3.295
     },
     {
       "id": "E79",
@@ -1399,8 +1399,8 @@
       "stage": "التصميم",
       "element": "الدور",
       "weight": 25,
-      "verification": 5.49,
-      "earnedWeight": 1.3725
+      "verification": 5.5,
+      "earnedWeight": 1.375
     },
     {
       "id": "E92",
@@ -1410,8 +1410,8 @@
       "stage": "التصميم",
       "element": "الأهداف ومؤشرات الأداء",
       "weight": 15,
-      "verification": 70.24,
-      "earnedWeight": 10.536
+      "verification": 5.5,
+      "earnedWeight": 0.825
     },
     {
       "id": "E93",
@@ -1421,8 +1421,8 @@
       "stage": "التصميم",
       "element": "الحوكمة",
       "weight": 15,
-      "verification": 58.66,
-      "earnedWeight": 8.799
+      "verification": 5.5,
+      "earnedWeight": 0.825
     },
     {
       "id": "E94",
@@ -1432,8 +1432,8 @@
       "stage": "التصميم",
       "element": "التنظيم",
       "weight": 20,
-      "verification": 27.35,
-      "earnedWeight": 5.47
+      "verification": 5.5,
+      "earnedWeight": 1.1
     },
     {
       "id": "E95",
@@ -1443,8 +1443,8 @@
       "stage": "التصميم",
       "element": "الموارد",
       "weight": 20,
-      "verification": 75.48,
-      "earnedWeight": 15.096000000000002
+      "verification": 5.5,
+      "earnedWeight": 1.1
     },
     {
       "id": "E96",
@@ -1454,8 +1454,8 @@
       "stage": "التصميم",
       "element": "الإجراءات",
       "weight": 5,
-      "verification": 62.86,
-      "earnedWeight": 3.1430000000000002
+      "verification": 5.5,
+      "earnedWeight": 0.275
     },
     {
       "id": "E97",
@@ -1608,8 +1608,8 @@
       "stage": "التصميم",
       "element": "الأهداف ومؤشرات الأداء",
       "weight": 15,
-      "verification": 73.02,
-      "earnedWeight": 10.953
+      "verification": 4.4,
+      "earnedWeight": 0.66
     },
     {
       "id": "E111",
@@ -1619,8 +1619,8 @@
       "stage": "التصميم",
       "element": "الحوكمة",
       "weight": 15,
-      "verification": 6.65,
-      "earnedWeight": 0.9975
+      "verification": 4.4,
+      "earnedWeight": 0.66
     },
     {
       "id": "E112",
@@ -1630,8 +1630,8 @@
       "stage": "التصميم",
       "element": "التنظيم",
       "weight": 20,
-      "verification": 54.8,
-      "earnedWeight": 10.96
+      "verification": 4.4,
+      "earnedWeight": 0.88
     },
     {
       "id": "E113",
@@ -1641,8 +1641,8 @@
       "stage": "التصميم",
       "element": "الموارد",
       "weight": 20,
-      "verification": 42.69,
-      "earnedWeight": 8.538
+      "verification": 4.4,
+      "earnedWeight": 0.88
     },
     {
       "id": "E114",
@@ -1652,8 +1652,8 @@
       "stage": "التصميم",
       "element": "الإجراءات",
       "weight": 5,
-      "verification": 68.45,
-      "earnedWeight": 3.4225
+      "verification": 4.4,
+      "earnedWeight": 0.22
     },
     {
       "id": "E115",
@@ -1795,8 +1795,8 @@
       "stage": "التصميم",
       "element": "الدور",
       "weight": 25,
-      "verification": 65.95,
-      "earnedWeight": 16.4875
+      "verification": 66,
+      "earnedWeight": 16.5
     },
     {
       "id": "E128",
@@ -1806,8 +1806,8 @@
       "stage": "التصميم",
       "element": "الأهداف ومؤشرات الأداء",
       "weight": 15,
-      "verification": 66.56,
-      "earnedWeight": 9.984000000000002
+      "verification": 66,
+      "earnedWeight": 9.9
     },
     {
       "id": "E129",
@@ -1817,8 +1817,8 @@
       "stage": "التصميم",
       "element": "الحوكمة",
       "weight": 15,
-      "verification": 30.09,
-      "earnedWeight": 4.5135000000000005
+      "verification": 66,
+      "earnedWeight": 9.9
     },
     {
       "id": "E130",
@@ -1828,8 +1828,8 @@
       "stage": "التصميم",
       "element": "التنظيم",
       "weight": 20,
-      "verification": 17.87,
-      "earnedWeight": 3.5740000000000003
+      "verification": 66,
+      "earnedWeight": 13.2
     },
     {
       "id": "E131",
@@ -1839,8 +1839,8 @@
       "stage": "التصميم",
       "element": "الموارد",
       "weight": 20,
-      "verification": 42.26,
-      "earnedWeight": 8.452
+      "verification": 66,
+      "earnedWeight": 13.2
     },
     {
       "id": "E132",
@@ -1850,8 +1850,8 @@
       "stage": "التصميم",
       "element": "الإجراءات",
       "weight": 5,
-      "verification": 83.26,
-      "earnedWeight": 4.163
+      "verification": 66,
+      "earnedWeight": 3.3
     },
     {
       "id": "E133",
@@ -1993,8 +1993,8 @@
       "stage": "التصميم",
       "element": "الدور",
       "weight": 25,
-      "verification": 8.64,
-      "earnedWeight": 2.16
+      "verification": 8.6,
+      "earnedWeight": 2.15
     },
     {
       "id": "E146",
@@ -2004,8 +2004,8 @@
       "stage": "التصميم",
       "element": "الأهداف ومؤشرات الأداء",
       "weight": 15,
-      "verification": 67.47,
-      "earnedWeight": 10.1205
+      "verification": 8.6,
+      "earnedWeight": 1.29
     },
     {
       "id": "E147",
@@ -2015,8 +2015,8 @@
       "stage": "التصميم",
       "element": "الحوكمة",
       "weight": 15,
-      "verification": 65.74,
-      "earnedWeight": 9.860999999999999
+      "verification": 8.6,
+      "earnedWeight": 1.29
     },
     {
       "id": "E148",
@@ -2026,8 +2026,8 @@
       "stage": "التصميم",
       "element": "التنظيم",
       "weight": 20,
-      "verification": 24.12,
-      "earnedWeight": 4.824000000000001
+      "verification": 8.6,
+      "earnedWeight": 1.72
     },
     {
       "id": "E149",
@@ -2037,8 +2037,8 @@
       "stage": "التصميم",
       "element": "الموارد",
       "weight": 20,
-      "verification": 85.65,
-      "earnedWeight": 17.13
+      "verification": 8.6,
+      "earnedWeight": 1.72
     },
     {
       "id": "E150",
@@ -2048,8 +2048,8 @@
       "stage": "التصميم",
       "element": "الإجراءات",
       "weight": 5,
-      "verification": 22.85,
-      "earnedWeight": 1.1425
+      "verification": 8.6,
+      "earnedWeight": 0.43
     },
     {
       "id": "E151",
@@ -2191,8 +2191,8 @@
       "stage": "التصميم",
       "element": "الدور",
       "weight": 25,
-      "verification": 83.26,
-      "earnedWeight": 20.815
+      "verification": 83.3,
+      "earnedWeight": 20.825
     },
     {
       "id": "E164",
@@ -2202,8 +2202,8 @@
       "stage": "التصميم",
       "element": "الأهداف ومؤشرات الأداء",
       "weight": 15,
-      "verification": 13.27,
-      "earnedWeight": 1.9905
+      "verification": 83.3,
+      "earnedWeight": 12.495
     },
     {
       "id": "E165",
@@ -2213,8 +2213,8 @@
       "stage": "التصميم",
       "element": "الحوكمة",
       "weight": 15,
-      "verification": 10.46,
-      "earnedWeight": 1.569
+      "verification": 83.3,
+      "earnedWeight": 12.495
     },
     {
       "id": "E166",
@@ -2224,8 +2224,8 @@
       "stage": "التصميم",
       "element": "التنظيم",
       "weight": 20,
-      "verification": 59.32,
-      "earnedWeight": 11.864
+      "verification": 83.3,
+      "earnedWeight": 16.66
     },
     {
       "id": "E167",
@@ -2235,8 +2235,8 @@
       "stage": "التصميم",
       "element": "الموارد",
       "weight": 20,
-      "verification": 10.46,
-      "earnedWeight": 2.092
+      "verification": 83.3,
+      "earnedWeight": 16.66
     },
     {
       "id": "E168",
@@ -2246,8 +2246,8 @@
       "stage": "التصميم",
       "element": "الإجراءات",
       "weight": 5,
-      "verification": 44.54,
-      "earnedWeight": 2.227
+      "verification": 83.3,
+      "earnedWeight": 4.165
     },
     {
       "id": "E169",
@@ -2389,8 +2389,8 @@
       "stage": "التصميم",
       "element": "الدور",
       "weight": 25,
-      "verification": 81.05,
-      "earnedWeight": 20.2625
+      "verification": 81.1,
+      "earnedWeight": 20.275
     },
     {
       "id": "E182",
@@ -2400,8 +2400,8 @@
       "stage": "التصميم",
       "element": "الأهداف ومؤشرات الأداء",
       "weight": 15,
-      "verification": 66.11,
-      "earnedWeight": 9.9165
+      "verification": 81.1,
+      "earnedWeight": 12.165
     },
     {
       "id": "E183",
@@ -2411,8 +2411,8 @@
       "stage": "التصميم",
       "element": "الحوكمة",
       "weight": 15,
-      "verification": 75.15,
-      "earnedWeight": 11.2725
+      "verification": 81.1,
+      "earnedWeight": 12.165
     },
     {
       "id": "E184",
@@ -2422,8 +2422,8 @@
       "stage": "التصميم",
       "element": "التنظيم",
       "weight": 20,
-      "verification": 10.46,
-      "earnedWeight": 2.092
+      "verification": 81.1,
+      "earnedWeight": 16.22
     },
     {
       "id": "E185",
@@ -2433,8 +2433,8 @@
       "stage": "التصميم",
       "element": "الموارد",
       "weight": 20,
-      "verification": 1.48,
-      "earnedWeight": 0.29600000000000004
+      "verification": 81.1,
+      "earnedWeight": 16.22
     },
     {
       "id": "E186",
@@ -2444,8 +2444,8 @@
       "stage": "التصميم",
       "element": "الإجراءات",
       "weight": 5,
-      "verification": 44.97,
-      "earnedWeight": 2.2485
+      "verification": 81.1,
+      "earnedWeight": 4.055
     },
     {
       "id": "E187",
@@ -2587,8 +2587,8 @@
       "stage": "التصميم",
       "element": "الدور",
       "weight": 25,
-      "verification": 79.85,
-      "earnedWeight": 19.9625
+      "verification": 79.9,
+      "earnedWeight": 19.975
     },
     {
       "id": "E200",
@@ -2598,8 +2598,8 @@
       "stage": "التصميم",
       "element": "الأهداف ومؤشرات الأداء",
       "weight": 15,
-      "verification": 65.92,
-      "earnedWeight": 9.888
+      "verification": 79.9,
+      "earnedWeight": 11.985
     },
     {
       "id": "E201",
@@ -2609,8 +2609,8 @@
       "stage": "التصميم",
       "element": "الحوكمة",
       "weight": 15,
-      "verification": 57.63,
-      "earnedWeight": 8.6445
+      "verification": 79.9,
+      "earnedWeight": 11.985
     },
     {
       "id": "E202",
@@ -2620,8 +2620,8 @@
       "stage": "التصميم",
       "element": "التنظيم",
       "weight": 20,
-      "verification": 46.98,
-      "earnedWeight": 9.395999999999999
+      "verification": 79.9,
+      "earnedWeight": 15.98
     },
     {
       "id": "E203",
@@ -2631,8 +2631,8 @@
       "stage": "التصميم",
       "element": "الموارد",
       "weight": 20,
-      "verification": 96.3,
-      "earnedWeight": 19.26
+      "verification": 79.9,
+      "earnedWeight": 15.98
     },
     {
       "id": "E204",
@@ -2642,8 +2642,8 @@
       "stage": "التصميم",
       "element": "الإجراءات",
       "weight": 5,
-      "verification": 95.61,
-      "earnedWeight": 4.7805
+      "verification": 79.9,
+      "earnedWeight": 3.995
     },
     {
       "id": "E205",
@@ -2785,8 +2785,8 @@
       "stage": "التصميم",
       "element": "الدور",
       "weight": 25,
-      "verification": 1.06,
-      "earnedWeight": 0.265
+      "verification": 1.1,
+      "earnedWeight": 0.275
     },
     {
       "id": "E218",
@@ -2796,8 +2796,8 @@
       "stage": "التصميم",
       "element": "الأهداف ومؤشرات الأداء",
       "weight": 15,
-      "verification": 55.12,
-      "earnedWeight": 8.267999999999999
+      "verification": 1.1,
+      "earnedWeight": 0.165
     },
     {
       "id": "E219",
@@ -2807,8 +2807,8 @@
       "stage": "التصميم",
       "element": "الحوكمة",
       "weight": 15,
-      "verification": 93.64,
-      "earnedWeight": 14.046
+      "verification": 1.1,
+      "earnedWeight": 0.165
     },
     {
       "id": "E220",
@@ -2818,8 +2818,8 @@
       "stage": "التصميم",
       "element": "التنظيم",
       "weight": 20,
-      "verification": 94.09,
-      "earnedWeight": 18.818
+      "verification": 1.1,
+      "earnedWeight": 0.22
     },
     {
       "id": "E221",
@@ -2829,8 +2829,8 @@
       "stage": "التصميم",
       "element": "الموارد",
       "weight": 20,
-      "verification": 38.75,
-      "earnedWeight": 7.75
+      "verification": 1.1,
+      "earnedWeight": 0.22
     },
     {
       "id": "E222",
@@ -2840,8 +2840,8 @@
       "stage": "التصميم",
       "element": "الإجراءات",
       "weight": 5,
-      "verification": 45.05,
-      "earnedWeight": 2.2525
+      "verification": 1.1,
+      "earnedWeight": 0.055
     },
     {
       "id": "E223",
@@ -2983,8 +2983,8 @@
       "stage": "التصميم",
       "element": "الدور",
       "weight": 25,
-      "verification": 91.74,
-      "earnedWeight": 22.935
+      "verification": 91.7,
+      "earnedWeight": 22.925
     },
     {
       "id": "E236",
@@ -2994,8 +2994,8 @@
       "stage": "التصميم",
       "element": "الأهداف ومؤشرات الأداء",
       "weight": 15,
-      "verification": 52.99,
-      "earnedWeight": 7.9485
+      "verification": 91.7,
+      "earnedWeight": 13.755
     },
     {
       "id": "E237",
@@ -3005,8 +3005,8 @@
       "stage": "التصميم",
       "element": "الحوكمة",
       "weight": 15,
-      "verification": 12.88,
-      "earnedWeight": 1.9320000000000002
+      "verification": 91.7,
+      "earnedWeight": 13.755
     },
     {
       "id": "E238",
@@ -3016,8 +3016,8 @@
       "stage": "التصميم",
       "element": "التنظيم",
       "weight": 20,
-      "verification": 59.53,
-      "earnedWeight": 11.905999999999999
+      "verification": 91.7,
+      "earnedWeight": 18.34
     },
     {
       "id": "E239",
@@ -3027,8 +3027,8 @@
       "stage": "التصميم",
       "element": "الموارد",
       "weight": 20,
-      "verification": 56.8,
-      "earnedWeight": 11.36
+      "verification": 91.7,
+      "earnedWeight": 18.34
     },
     {
       "id": "E240",
@@ -3038,8 +3038,8 @@
       "stage": "التصميم",
       "element": "الإجراءات",
       "weight": 5,
-      "verification": 6.09,
-      "earnedWeight": 0.3045
+      "verification": 91.7,
+      "earnedWeight": 4.585
     },
     {
       "id": "E241",
