@@ -220,11 +220,11 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .page-hero span { color: var(--muted); font-size: 13px; }
 .guide-grid { margin-top: 16px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 .guide-card { overflow: hidden; display: grid; grid-template-rows: 178px auto; border: 1px solid var(--line); border-radius: 17px; background: rgba(255,255,255,.91); box-shadow: 0 10px 28px rgba(23,52,41,.045); }
-.guide-visual { position: relative; overflow: hidden; border-bottom: 1px solid #e6eeea; background-color: #f8fbf9; background-image: url("/guide-visuals.png"); background-repeat: no-repeat; background-size: 205% 205%; }
-.guide-visual.filters { background-position: 0 0; }
-.guide-visual.stages { background-position: 100% 0; }
-.guide-visual.details { background-position: 0 100%; }
-.guide-visual.upload { background-position: 100% 100%; }
+.guide-visual { position: relative; overflow: hidden; border-bottom: 1px solid #e6eeea; background-color: #f8fbf9; background-image: url("/guide-visuals.png"); background-repeat: no-repeat; background-size: 200% auto; }
+.guide-visual.filters { background-position: 0 17%; }
+.guide-visual.stages { background-position: 100% 17%; }
+.guide-visual.details { background-position: 0 72%; }
+.guide-visual.upload { background-position: 100% 72%; }
 .guide-visual::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(248,251,249,.1), transparent 52%); pointer-events: none; }
 .guide-visual b { position: absolute; z-index: 1; top: 12px; right: 12px; width: 38px; height: 38px; display: grid; place-items: center; border: 1px solid rgba(255,255,255,.8); border-radius: 12px; color: var(--green); background: rgba(255,255,255,.9); box-shadow: 0 5px 15px rgba(23,52,41,.1); font-size: 10px; }
 .guide-copy { padding: 15px 18px 18px; }
