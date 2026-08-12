@@ -4,6 +4,11 @@
     "initialMax": 30,
     "advancedMinExclusive": 70
   },
+  "stages": [
+    "التصميم",
+    "التفعيل",
+    "التشغيل"
+  ],
   "rows": [
     {
       "id": "M01",

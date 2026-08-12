@@ -1,9 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import modelData from "./model-data.json";
 
-type Stage = "التصميم" | "التفعيل" | "التشغيل";
+type Stage = string;
 type FilterKey = "sector" | "mainUnit" | "subUnit" | "element";
 type ViewKey = "element" | "mainUnit" | "subUnit";
 
@@ -21,8 +21,13 @@ type DataRow = {
 
 type FilterState = Record<FilterKey, string[]>;
 
-const rows = modelData.rows as DataRow[];
-const stages: Stage[] = ["التصميم", "التفعيل", "التشغيل"];
+type DataPayload = { rows: DataRow[]; stages: Stage[]; thresholds: { initialMax: number; advancedMinExclusive: number } };
+
+const defaultData: DataPayload = {
+  rows: modelData.rows as DataRow[],
+  stages: ["التصميم", "التفعيل", "التشغيل"],
+  thresholds: modelData.thresholds,
+};
 const maturityStates = ["أولي", "جزئي", "متقدم"] as const;
 const emptyFilters: FilterState = { sector: [], mainUnit: [], subUnit: [], element: [] };
 
@@ -39,11 +44,7 @@ const viewLabels: Record<ViewKey, string> = {
   subUnit: "الوحدات الفرعية",
 };
 
-const stageMeta: Record<Stage, { className: string }> = {
-  التصميم: { className: "design" },
-  التفعيل: { className: "activation" },
-  التشغيل: { className: "operation" },
-};
+const stageClasses = ["design", "activation", "operation"];
 
 function weightedPercentage(items: DataRow[]) {
   const denominator = items.reduce((sum, item) => sum + item.weight, 0);
@@ -52,10 +53,10 @@ function weightedPercentage(items: DataRow[]) {
   return (numerator / denominator) * 100;
 }
 
-function maturityLabel(value: number | null) {
+function maturityLabel(value: number | null, thresholds: DataPayload["thresholds"]) {
   if (value === null) return "لا توجد بيانات";
-  if (value <= modelData.thresholds.initialMax) return "أولي";
-  if (value > modelData.thresholds.advancedMinExclusive) return "متقدم";
+  if (value <= thresholds.initialMax) return "أولي";
+  if (value > thresholds.advancedMinExclusive) return "متقدم";
   return "جزئي";
 }
 
@@ -132,14 +133,31 @@ function MultiSelect({
 }
 
 export default function Home() {
+  const [data, setData] = useState<DataPayload>(defaultData);
+  const [activeVersionId, setActiveVersionId] = useState<string | null>(null);
   const [filters, setFilters] = useState<FilterState>(emptyFilters);
   const [openFilter, setOpenFilter] = useState<FilterKey | null>(null);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
-  const [activeStage, setActiveStage] = useState<Stage>("التصميم");
+  const [activeStage, setActiveStage] = useState<Stage>(defaultData.stages[0]);
   const [activeView, setActiveView] = useState<ViewKey>("element");
   const [page, setPage] = useState(0);
   const [detail, setDetail] = useState<{ name: string; view: ViewKey } | null>(null);
   const [detailPage, setDetailPage] = useState(0);
+  const rows = data.rows;
+  const stages = data.stages;
+
+  useEffect(() => {
+    fetch("/api/data", { cache: "no-store" })
+      .then((response) => response.ok ? response.json() : null)
+      .then((result) => {
+        if (!result?.data?.rows?.length || !result?.data?.stages?.length) return;
+        setData(result.data);
+        setActiveVersionId(result.id);
+        setActiveStage(result.data.stages[0]);
+        setFilters(emptyFilters);
+      })
+      .catch(() => undefined);
+  }, []);
 
   const filteredRows = useMemo(
     () => rows.filter((row) => matchesFilters(row, filters)),
@@ -247,7 +265,12 @@ export default function Home() {
         <button className="mobile-filter-button" type="button" onClick={() => setMobileFiltersOpen(true)}>
           الفلاتر {activeFilterCount ? `(${activeFilterCount})` : ""}
         </button>
-        <a className="download-link" href="/النموذج_التشغيلي_موحد_النسب.xlsx" download>
+        <nav className="site-nav" aria-label="التنقل الرئيسي">
+          <a className="active" href="/">لوحة التحليل</a>
+          <a href="/guide">الدليل الإرشادي</a>
+          <a href="/upload">رفع البيانات</a>
+        </nav>
+        <a className="download-link" href={activeVersionId ? `/api/versions/${activeVersionId}/file` : "/النموذج_التشغيلي_موحد_النسب.xlsx"} download>
           تنزيل البيانات
         </a>
       </header>
@@ -271,12 +294,13 @@ export default function Home() {
         <div className="stage-grid">
           {stages.map((stage) => {
           const value = metrics[stage];
-          const meta = stageMeta[stage];
-          const maturity = maturityLabel(value);
+          const stageIndex = stages.indexOf(stage);
+          const stageClass = stageClasses[stageIndex % stageClasses.length];
+          const maturity = maturityLabel(value, data.thresholds);
           return (
             <button
               type="button"
-              className={`stage-card ${meta.className} ${activeStage === stage ? "active" : ""}`}
+              className={`stage-card ${stageClass} ${activeStage === stage ? "active" : ""}`}
               key={stage}
               onClick={() => { setActiveStage(stage); setPage(0); }}
             >
@@ -306,7 +330,7 @@ export default function Home() {
         </div>
       </section>
 
-      {!allFiltersSelected && <section className={`analysis-panel ${stageMeta[activeStage].className}`}>
+      {!allFiltersSelected && <section className={`analysis-panel ${stageClasses[Math.max(0, stages.indexOf(activeStage)) % stageClasses.length]}`}>
         <div className="analysis-head">
           <div>
             <p>تفصيل المرحلة المختارة</p>
