@@ -2,55 +2,71 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import modelData from "./model-data.json";
+import {
+  DEFAULT_COLUMN_LABELS,
+  LOCAL_SYNC_FINGERPRINT_KEY,
+  fileFingerprint,
+  parseWorkbook,
+  readLinkedWorkbook,
+  uploadWorkbookVersion,
+  type ColumnLabels,
+  type WorkbookRow,
+} from "./workbook-data";
 
 type Stage = string;
 type FilterKey = "sector" | "mainUnit" | "subUnit" | "element";
 type ViewKey = "element" | "mainUnit" | "subUnit";
 
-type DataRow = {
-  id: string;
-  sector: string;
-  mainUnit: string;
-  subUnit: string;
-  stage: Stage;
-  element: string;
-  weight: number;
-  verification: number;
-  earnedWeight: number;
-};
+type DataRow = WorkbookRow;
 
 type FilterState = Record<FilterKey, string[]>;
 
-type DataPayload = { rows: DataRow[]; stages: Stage[]; thresholds: { initialMax: number; advancedMinExclusive: number } };
+type DataPayload = {
+  rows: DataRow[];
+  stages: Stage[];
+  columns: ColumnLabels;
+  thresholds: { initialMax: number; advancedMinExclusive: number };
+};
 
 const defaultData: DataPayload = {
   rows: modelData.rows as DataRow[],
   stages: modelData.stages as Stage[],
+  columns: DEFAULT_COLUMN_LABELS,
   thresholds: modelData.thresholds,
 };
 const maturityStates = ["أولي", "جزئي", "متقدم"] as const;
 const emptyFilters: FilterState = { sector: [], mainUnit: [], subUnit: [], element: [] };
-
-const filterLabels: Record<FilterKey, string> = {
-  sector: "القطاع",
-  mainUnit: "الوحدة الرئيسية",
-  subUnit: "الوحدة الفرعية",
-  element: "العنصر",
-};
-
-const viewLabels: Record<ViewKey, string> = {
-  element: "العناصر",
-  mainUnit: "الوحدات الرئيسية",
-  subUnit: "الوحدات الفرعية",
-};
+const filterKeys: FilterKey[] = ["sector", "mainUnit", "subUnit", "element"];
+const viewKeys: ViewKey[] = ["element", "mainUnit", "subUnit"];
 
 const stageClasses = ["design", "activation", "operation"];
 
 function weightedPercentage(items: DataRow[]) {
-  const denominator = items.reduce((sum, item) => sum + item.weight, 0);
+  const denominator = items.reduce((sum, item) => sum + (Number.isFinite(item.weight) ? item.weight : 0), 0);
   if (!denominator) return null;
-  const numerator = items.reduce((sum, item) => sum + item.earnedWeight, 0);
+  const numerator = items.reduce((sum, item) => sum + (Number.isFinite(item.earnedWeight) ? item.earnedWeight : 0), 0);
   return (numerator / denominator) * 100;
+}
+
+function formatPercentage(value: unknown) {
+  return typeof value === "number" && Number.isFinite(value) ? value.toFixed(1) : "—";
+}
+
+function normalizeData(payload: Partial<DataPayload>): DataPayload | null {
+  if (!Array.isArray(payload.rows) || payload.rows.length === 0) return null;
+  const stages = Array.isArray(payload.stages) && payload.stages.length
+    ? payload.stages.map(String)
+    : [...new Set(payload.rows.map((row) => String(row.stage)).filter(Boolean))];
+  if (!stages.length) return null;
+  return {
+    rows: payload.rows,
+    stages,
+    columns: { ...DEFAULT_COLUMN_LABELS, ...(payload.columns ?? {}) },
+    thresholds: {
+      initialMax: payload.thresholds?.initialMax ?? defaultData.thresholds.initialMax,
+      advancedMinExclusive: payload.thresholds?.advancedMinExclusive ?? defaultData.thresholds.advancedMinExclusive,
+    },
+  };
 }
 
 function maturityLabel(value: number | null, thresholds: DataPayload["thresholds"]) {
@@ -72,6 +88,7 @@ function matchesFilters(item: DataRow, filters: FilterState, skip?: FilterKey) {
 
 function MultiSelect({
   filterKey,
+  label,
   options,
   selected,
   open,
@@ -80,6 +97,7 @@ function MultiSelect({
   onClear,
 }: {
   filterKey: FilterKey;
+  label: string;
   options: string[];
   selected: string[];
   open: boolean;
@@ -94,7 +112,7 @@ function MultiSelect({
     <div className={`filter-control ${open ? "is-open" : ""}`}>
       <button className="filter-trigger" type="button" onClick={onOpen} aria-expanded={open}>
         <span>
-          <small>{filterLabels[filterKey]}</small>
+          <small>{label}</small>
           <strong>{selected.length === 1 ? selected[0] : selected.length ? `${selected.length} محدد` : "الكل"}</strong>
         </span>
         <span className="chevron">⌄</span>
@@ -105,8 +123,8 @@ function MultiSelect({
             <input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder={`ابحث في ${filterLabels[filterKey]}`}
-              aria-label={`بحث في ${filterLabels[filterKey]}`}
+              placeholder={`ابحث في ${label}`}
+              aria-label={`بحث في ${label}`}
               autoFocus
             />
             {selected.length > 0 && (
@@ -146,23 +164,70 @@ export default function Home() {
   const loadedVersionId = useRef<string | null>(null);
   const rows = data.rows;
   const stages = data.stages;
+  const columns = data.columns;
+  const filterLabels: Record<FilterKey, string> = {
+    sector: columns.sector,
+    mainUnit: columns.mainUnit,
+    subUnit: columns.subUnit,
+    element: columns.element,
+  };
+  const viewLabels: Record<ViewKey, string> = {
+    element: columns.element,
+    mainUnit: columns.mainUnit,
+    subUnit: columns.subUnit,
+  };
 
   useEffect(() => {
     const refreshData = () => fetch("/api/data", { cache: "no-store" })
       .then((response) => response.ok ? response.json() : null)
       .then((result) => {
-        if (!result?.data?.rows?.length || !result?.data?.stages?.length) return;
+        const nextData = result?.data ? normalizeData(result.data) : null;
+        if (!nextData) return;
         if (loadedVersionId.current === result.id) return;
         loadedVersionId.current = result.id;
-        setData(result.data);
+        setData(nextData);
         setActiveVersionId(result.id);
-        setActiveStage(result.data.stages[0]);
+        setActiveStage(nextData.stages[0]);
         setFilters(emptyFilters);
       })
       .catch(() => undefined);
     refreshData();
     const watch = window.setInterval(refreshData, 4000);
     return () => window.clearInterval(watch);
+  }, []);
+
+  useEffect(() => {
+    let stopped = false;
+    let syncing = false;
+    let handle: Awaited<ReturnType<typeof readLinkedWorkbook>> = null;
+
+    const syncLinkedFile = async () => {
+      if (!handle || syncing || stopped) return;
+      try {
+        const permission = await handle.queryPermission?.({ mode: "read" });
+        if (permission !== "granted") return;
+        const file = await handle.getFile();
+        const fingerprint = fileFingerprint(file);
+        if (localStorage.getItem(LOCAL_SYNC_FINGERPRINT_KEY) === fingerprint) return;
+        syncing = true;
+        const parsed = await parseWorkbook(file);
+        await uploadWorkbookVersion(file, parsed);
+        localStorage.setItem(LOCAL_SYNC_FINGERPRINT_KEY, fingerprint);
+        loadedVersionId.current = null;
+      } catch {
+        // The dashboard remains usable if the local file is temporarily locked
+        // by Excel or the browser no longer has permission to read it.
+      } finally {
+        syncing = false;
+      }
+    };
+
+    readLinkedWorkbook().then((linkedHandle) => {
+      handle = linkedHandle;
+      return syncLinkedFile();
+    }).catch(() => undefined);
+    const watch = window.setInterval(syncLinkedFile, 4000);
+    return () => { stopped = true; window.clearInterval(watch); };
   }, []);
 
   const filteredRows = useMemo(
@@ -240,10 +305,11 @@ export default function Home() {
 
   const filterControls = (
     <>
-      {(Object.keys(filterLabels) as FilterKey[]).map((key) => (
+      {filterKeys.map((key) => (
         <MultiSelect
           key={key}
           filterKey={key}
+          label={filterLabels[key]}
           options={filterOptions[key]}
           selected={filters[key]}
           open={openFilter === key}
@@ -346,7 +412,7 @@ export default function Home() {
             <h2>{activeStage} حسب {viewLabels[activeView]}</h2>
           </div>
           <div className="view-tabs" role="tablist">
-            {(Object.keys(viewLabels) as ViewKey[]).map((key) => (
+            {viewKeys.map((key) => (
               <button
                 key={key}
                 type="button"
@@ -357,7 +423,7 @@ export default function Home() {
               </button>
             ))}
           </div>
-          <div className="legend"><i /> نسبة التحقق الموزونة</div>
+          <div className="legend"><i /> {columns.verification} الموزونة</div>
         </div>
 
         <div className="bars-grid">
@@ -370,7 +436,7 @@ export default function Home() {
             >
               <div className="bar-rank">{String(safePage * pageSize + index + 1).padStart(2, "0")}</div>
               <div className="bar-copy">
-                <div><strong>{group.name}</strong><span>{group.value.toFixed(1)}%</span></div>
+                <div><strong>{group.name}</strong><span>{formatPercentage(group.value)}%</span></div>
                 <div className="bar-track"><i style={{ width: `${group.value}%` }} /></div>
                 <small>{group.units} وحدة · {group.records} سجل</small>
               </div>
@@ -414,10 +480,10 @@ export default function Home() {
               <button type="button" onClick={() => setDetail(null)}>×</button>
             </div>
             <div className="detail-table" role="table">
-              <div className="detail-row detail-header" role="row"><span>المعرف</span><span>الوحدة الفرعية</span><span>العنصر</span><span>نسبة التحقق</span></div>
+              <div className="detail-row detail-header" role="row"><span>{columns.id}</span><span>{columns.subUnit}</span><span>{columns.element}</span><span>{columns.verification}</span></div>
               {visibleDetailRows.map((row) => (
                 <div className="detail-row" role="row" key={row.id}>
-                  <span>{row.id}</span><span>{row.subUnit}</span><span>{row.element}</span><b>{row.verification.toFixed(1)}%</b>
+                  <span>{row.id}</span><span>{row.subUnit}</span><span>{row.element}</span><b>{formatPercentage(row.verification)}%</b>
                 </div>
               ))}
             </div>
