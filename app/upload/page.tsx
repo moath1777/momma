@@ -92,7 +92,7 @@ export default function UploadPage() {
         const file = await linkedWorkbook.getFile();
         if (lastSyncedFingerprint.current !== fileFingerprint(file)) await syncWorkbook(file, true);
       } catch { setSyncState("تعذر الوصول للملف المرتبط"); }
-    }, 4000);
+    }, 1000);
     return () => window.clearInterval(watch);
   }, [linkedWorkbook, syncWorkbook]);
 

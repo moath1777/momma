@@ -194,7 +194,7 @@ export default function Home() {
       })
       .catch(() => undefined);
     refreshData();
-    const watch = window.setInterval(refreshData, 4000);
+    const watch = window.setInterval(refreshData, 1000);
     return () => window.clearInterval(watch);
   }, []);
 
@@ -228,7 +228,7 @@ export default function Home() {
       handle = linkedHandle;
       return syncLinkedFile();
     }).catch(() => undefined);
-    const watch = window.setInterval(syncLinkedFile, 4000);
+    const watch = window.setInterval(syncLinkedFile, 1000);
     return () => { stopped = true; window.clearInterval(watch); };
   }, []);
 
