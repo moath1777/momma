@@ -179,6 +179,7 @@ export default function Home() {
   const safePage = Math.min(page, pageCount - 1);
   const visibleGroups = groups.slice(safePage * pageSize, safePage * pageSize + pageSize);
   const activeFilterCount = Object.values(filters).reduce((sum, values) => sum + values.length, 0);
+  const allFiltersSelected = (Object.keys(filters) as FilterKey[]).every((key) => filters[key].length > 0);
 
   const detailRows = detail
     ? filteredRows.filter((row) => row.stage === activeStage && row[detail.view] === detail.name)
@@ -230,7 +231,7 @@ export default function Home() {
   );
 
   return (
-    <main className="dashboard-shell" onClick={(event) => {
+    <main className={`dashboard-shell ${allFiltersSelected ? "filters-complete" : ""}`} onClick={(event) => {
       if ((event.target as HTMLElement).closest(".filter-control")) return;
       setOpenFilter(null);
     }}>
@@ -295,7 +296,7 @@ export default function Home() {
         })}
       </section>
 
-      <section className={`analysis-panel ${stageMeta[activeStage].className}`}>
+      {!allFiltersSelected && <section className={`analysis-panel ${stageMeta[activeStage].className}`}>
         <div className="analysis-head">
           <div>
             <p>تفصيل المرحلة المختارة</p>
@@ -347,7 +348,7 @@ export default function Home() {
             </div>
           )}
         </div>
-      </section>
+      </section>}
 
       {mobileFiltersOpen && (
         <div className="drawer-backdrop" role="presentation" onClick={() => setMobileFiltersOpen(false)}>

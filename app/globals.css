@@ -37,6 +37,10 @@ button, a { -webkit-tap-highlight-color: transparent; }
     radial-gradient(circle at 2% 0%, rgba(31,110,67,.10), transparent 26%),
     linear-gradient(135deg, #f7f9f8 0%, #eef3f0 100%);
 }
+.dashboard-shell.filters-complete {
+  grid-template-rows: auto auto minmax(178px, 28vh);
+  align-content: start;
+}
 
 .topbar {
   min-height: 58px;
@@ -193,6 +197,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
 
 @media (max-width: 900px) {
   .dashboard-shell { grid-template-rows: auto minmax(155px, 26vh) minmax(0, 1fr); }
+  .dashboard-shell.filters-complete { grid-template-rows: auto minmax(155px, 26vh); }
   .filter-strip { display: none; }
   .mobile-filter-button { display: inline-block; margin-inline-start: auto; }
   .download-link { padding: 9px 11px; font-size: 10px; }
@@ -206,6 +211,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
 
 @media (max-width: 620px) {
   .dashboard-shell { padding: 9px; gap: 7px; grid-template-rows: auto minmax(130px, 23vh) minmax(0, 1fr); }
+  .dashboard-shell.filters-complete { grid-template-rows: auto minmax(130px, 23vh); }
   .topbar { min-height: 45px; gap: 8px; }
   .brand-logo { width: 46px; height: 42px; padding: 2px; border-radius: 11px; justify-content: flex-start; }
   .brand-logo img { width: auto; max-width: none; height: 100%; object-fit: contain; object-position: right center; }
@@ -242,6 +248,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
 
 @media (max-height: 680px) and (min-width: 621px) {
   .dashboard-shell { padding-block: 9px; gap: 7px; grid-template-rows: auto auto minmax(145px, 25vh) minmax(0,1fr); }
+  .dashboard-shell.filters-complete { grid-template-rows: auto auto minmax(145px, 25vh); }
   .topbar { min-height: 45px; }
   .brand-logo { height: 46px; }
   .filter-strip { padding-block: 5px; }
