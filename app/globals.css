@@ -139,23 +139,21 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .stage-title-links i:nth-child(2) { color: var(--amber); background: linear-gradient(90deg, transparent, var(--amber), transparent); }
 .stage-title-links i:nth-child(3) { color: var(--green); background: linear-gradient(90deg, transparent, var(--green), transparent); }
 .stage-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(9px, 1vw, 15px); min-height: 0; }
-.stage-card { --accent: var(--green); position: relative; border: 1px solid var(--line); background: rgba(255,255,255,.93); border-radius: 19px; padding: clamp(12px, 1.5vw, 20px); text-align: right; cursor: pointer; overflow: hidden; box-shadow: 0 12px 35px rgba(23,52,41,.055); transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease; }
+.stage-card { --accent: var(--green); position: relative; display: grid; place-items: center; border: 1px solid var(--line); background: rgba(255,255,255,.93); border-radius: 19px; padding: clamp(12px, 1.5vw, 20px); text-align: center; cursor: pointer; overflow: hidden; box-shadow: 0 12px 35px rgba(23,52,41,.055); transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease; }
 .stage-card::before { content: ""; position: absolute; width: 150px; height: 150px; border-radius: 50%; background: color-mix(in srgb, var(--accent) 8%, transparent); left: -70px; top: -80px; }
 .stage-card:hover { transform: translateY(-2px); }
 .stage-card.active { border-color: color-mix(in srgb, var(--accent) 52%, white); box-shadow: 0 15px 38px color-mix(in srgb, var(--accent) 15%, transparent); }
 .stage-card.design { --accent: var(--teal); }
 .stage-card.activation { --accent: var(--amber); }
 .stage-card.operation { --accent: var(--green); }
-.stage-card-head { display: flex; justify-content: flex-end; align-items: center; position: relative; z-index: 1; }
+.stage-card-head { position: absolute; top: clamp(10px, 1vw, 15px); right: 0; left: 0; z-index: 2; display: flex; justify-content: center; align-items: center; }
 .stage-status { font-size: 9px; padding: 5px 9px; border-radius: 999px; color: var(--accent); background: color-mix(in srgb, var(--accent) 9%, white); font-weight: 800; }
-.stage-card-main { height: calc(100% - 36px); min-height: 90px; display: flex; align-items: center; justify-content: space-between; gap: 14px; position: relative; z-index: 1; }
-.stage-card h2 { margin: 0 0 5px; font-size: clamp(17px, 1.8vw, 25px); }
+.stage-card-main { width: 100%; height: 100%; min-height: 90px; display: flex; align-items: center; justify-content: center; gap: clamp(18px, 2.2vw, 36px); position: relative; z-index: 1; }
+.stage-card h2 { margin: 0; font-size: clamp(17px, 1.8vw, 25px); }
 .stage-card p { margin: 0; color: var(--muted); font-size: clamp(9px, .85vw, 12px); }
 .progress-ring { --progress: 0%; flex: 0 0 auto; width: clamp(78px, 7vw, 105px); aspect-ratio: 1; border-radius: 50%; display: grid; place-content: center; grid-auto-flow: column; align-items: baseline; color: var(--accent); background: radial-gradient(circle closest-side, white 78%, transparent 79% 99%), conic-gradient(var(--accent) var(--progress), #e8efec 0); direction: ltr; }
 .progress-ring span { font-size: clamp(20px, 2.1vw, 31px); font-weight: 900; letter-spacing: -.06em; }
 .progress-ring small { font-size: 12px; font-weight: 900; margin-left: 2px; }
-.stage-track { position: absolute; right: 0; bottom: 0; left: 0; height: 4px; background: #edf2f0; }
-.stage-track i { display: block; height: 100%; background: var(--accent); }
 
 .analysis-panel { --accent: var(--green); min-height: 0; overflow: hidden; border: 1px solid var(--line); border-radius: 19px; background: rgba(255,255,255,.94); padding: clamp(12px, 1.35vw, 19px); display: grid; grid-template-rows: auto minmax(0, 1fr) auto; gap: 9px; box-shadow: 0 14px 35px rgba(23,52,41,.05); }
 .analysis-panel.design { --accent: var(--teal); }

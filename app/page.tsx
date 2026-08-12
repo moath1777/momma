@@ -290,11 +290,10 @@ export default function Home() {
                   <span>{value === null ? "—" : value.toFixed(1)}</span>
                   <small>%</small>
                 </div>
-                <div>
+              <div>
                   <h2>{stage}</h2>
                 </div>
               </div>
-              <div className="stage-track"><i style={{ width: `${value ?? 0}%` }} /></div>
             </button>
           );
           })}
