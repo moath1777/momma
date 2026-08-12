@@ -23,6 +23,7 @@ type FilterState = Record<FilterKey, string[]>;
 
 const rows = modelData.rows as DataRow[];
 const stages: Stage[] = ["التصميم", "التفعيل", "التشغيل"];
+const maturityStates = ["أولي", "جزئي", "متقدم"] as const;
 const emptyFilters: FilterState = { sector: [], mainUnit: [], subUnit: [], element: [] };
 
 const filterLabels: Record<FilterKey, string> = {
@@ -271,6 +272,7 @@ export default function Home() {
           {stages.map((stage) => {
           const value = metrics[stage];
           const meta = stageMeta[stage];
+          const maturity = maturityLabel(value);
           return (
             <button
               type="button"
@@ -279,7 +281,11 @@ export default function Home() {
               onClick={() => { setActiveStage(stage); setPage(0); }}
             >
               <div className="stage-card-head">
-                <span className="stage-status">{maturityLabel(value)}</span>
+                <div className="stage-statuses" aria-label={`مستوى النضج: ${maturity}`}>
+                  {maturityStates.map((state) => (
+                    <span className={maturity === state ? "is-lit" : ""} key={state}>{state}</span>
+                  ))}
+                </div>
               </div>
               <div className="stage-card-main">
                 <div
