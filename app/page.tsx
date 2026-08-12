@@ -167,7 +167,7 @@ export default function Home() {
 
   const filteredRows = useMemo(
     () => rows.filter((row) => matchesFilters(row, filters)),
-    [filters],
+    [filters, rows],
   );
 
   const filterOptions = useMemo(() => {
@@ -176,14 +176,14 @@ export default function Home() {
       result[key] = unique(rows.filter((row) => matchesFilters(row, filters, key)), key);
     });
     return result;
-  }, [filters]);
+  }, [filters, rows]);
 
   const metrics = useMemo(
     () => Object.fromEntries(stages.map((stage) => [
       stage,
       weightedPercentage(filteredRows.filter((row) => row.stage === stage)),
     ])) as Record<Stage, number | null>,
-    [filteredRows],
+    [filteredRows, stages],
   );
 
   const groups = useMemo(() => {
@@ -299,7 +299,10 @@ export default function Home() {
         </div>
         <div className="stage-grid">
           {stages.map((stage) => {
-          const value = metrics[stage];
+          // A newly uploaded workbook can briefly change the stage list before
+          // the derived metrics are recalculated. Treat a missing value as no
+          // data instead of allowing the visual formatter to crash the page.
+          const value = metrics[stage] ?? null;
           const stageIndex = stages.indexOf(stage);
           const stageClass = stageClasses[stageIndex % stageClasses.length];
           const maturity = maturityLabel(value, data.thresholds);
