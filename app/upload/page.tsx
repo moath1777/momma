@@ -9,7 +9,7 @@ type ParsedData = { rows: Array<Record<string, string | number>>; stages: string
 const REQUIRED_SHEETS = ["الإدخال والحساب", "المرجع", "النتائج"];
 const REQUIRED_HEADERS = ["ID", "القطاع", "الوحدة التنظيمية الرئيسية", "الوحدة التنظيمية الفرعية", "المرحلة", "العنصر", "الوزن في المرحلة", "نسبة التحقق %", "الوزن المكتسب"];
 const LOCAL_WORKBOOK_NAME = "النموذج_التشغيلي_موحد_النسب (4).xlsx";
-const LOCAL_WORKBOOK_URL = `ms-excel:ofe|u|${encodeURI(`file:///C:/Users/moath/Documents/momma/${LOCAL_WORKBOOK_NAME}`)}`;
+const LOCAL_WORKBOOK_URL = "ms-excel:ofe|u|file:///C:/Users/moath/Documents/momma/operating-model-maturity.xlsx";
 
 function parseWorkbook(file: File): Promise<ParsedData> {
   return file.arrayBuffer().then((buffer) => {
