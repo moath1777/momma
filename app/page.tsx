@@ -25,7 +25,7 @@ type DataPayload = { rows: DataRow[]; stages: Stage[]; thresholds: { initialMax:
 
 const defaultData: DataPayload = {
   rows: modelData.rows as DataRow[],
-  stages: ["التصميم", "التفعيل", "التشغيل"],
+  stages: modelData.stages as Stage[],
   thresholds: modelData.thresholds,
 };
 const maturityStates = ["أولي", "جزئي", "متقدم"] as const;
