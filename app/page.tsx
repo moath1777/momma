@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import modelData from "./model-data.json";
 
 type Stage = string;
@@ -143,20 +143,26 @@ export default function Home() {
   const [page, setPage] = useState(0);
   const [detail, setDetail] = useState<{ name: string; view: ViewKey } | null>(null);
   const [detailPage, setDetailPage] = useState(0);
+  const loadedVersionId = useRef<string | null>(null);
   const rows = data.rows;
   const stages = data.stages;
 
   useEffect(() => {
-    fetch("/api/data", { cache: "no-store" })
+    const refreshData = () => fetch("/api/data", { cache: "no-store" })
       .then((response) => response.ok ? response.json() : null)
       .then((result) => {
         if (!result?.data?.rows?.length || !result?.data?.stages?.length) return;
+        if (loadedVersionId.current === result.id) return;
+        loadedVersionId.current = result.id;
         setData(result.data);
         setActiveVersionId(result.id);
         setActiveStage(result.data.stages[0]);
         setFilters(emptyFilters);
       })
       .catch(() => undefined);
+    refreshData();
+    const watch = window.setInterval(refreshData, 4000);
+    return () => window.clearInterval(watch);
   }, []);
 
   const filteredRows = useMemo(
