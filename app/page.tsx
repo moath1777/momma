@@ -95,7 +95,7 @@ function MultiSelect({
       <button className="filter-trigger" type="button" onClick={onOpen} aria-expanded={open}>
         <span>
           <small>{filterLabels[filterKey]}</small>
-          <strong>{selected.length ? `${selected.length} محدد` : "الكل"}</strong>
+          <strong>{selected.length === 1 ? selected[0] : selected.length ? `${selected.length} محدد` : "الكل"}</strong>
         </span>
         <span className="chevron">⌄</span>
       </button>
