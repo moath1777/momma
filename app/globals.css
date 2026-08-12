@@ -129,17 +129,15 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .reset-button { border: 0; border-radius: 9px; padding: 9px 10px; background: #eef5f1; color: var(--green-dark); font-size: 10px; font-weight: 800; cursor: pointer; white-space: nowrap; }
 .reset-button:disabled { opacity: .38; cursor: default; }
 
-.stage-section { min-height: 0; display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 8px; }
-.stage-section-head { min-height: 38px; display: flex; align-items: center; gap: 10px; padding: 6px 12px; border: 1px solid #dce7e2; border-radius: 12px; background: linear-gradient(90deg, rgba(255,255,255,.72), rgba(236,244,240,.88)); box-shadow: 0 7px 20px rgba(24,57,43,.035); }
-.stage-title-mark { display: flex; flex-direction: column; gap: 3px; }
-.stage-title-mark i { display: block; width: 18px; height: 3px; border-radius: 99px; }
-.stage-title-mark i:nth-child(1) { background: var(--teal); }
-.stage-title-mark i:nth-child(2) { background: var(--amber); }
-.stage-title-mark i:nth-child(3) { background: var(--green); }
-.stage-title-copy { display: grid; gap: 1px; }
-.stage-title-copy > span { color: var(--green); font-size: 8px; font-weight: 900; letter-spacing: .08em; }
-.stages-title { margin: 0; color: var(--ink); font-size: clamp(13px, 1.15vw, 17px); font-weight: 900; letter-spacing: -.02em; }
-.stage-title-rule { height: 1px; flex: 1; min-width: 24px; background: linear-gradient(90deg, var(--line), transparent); }
+.stage-section { min-height: 0; display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 7px; }
+.stage-section-head { display: grid; justify-items: center; gap: 5px; }
+.stage-section-head h2 { margin: 0; padding: 7px 26px; border: 1px solid #d8e5df; border-radius: 999px; color: var(--ink); background: rgba(255,255,255,.92); box-shadow: 0 8px 24px rgba(22,58,43,.07); font-size: clamp(13px, 1.2vw, 18px); font-weight: 900; text-align: center; letter-spacing: -.02em; }
+.stage-title-links { width: calc(100% - clamp(40px, 5vw, 80px)); display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(9px, 1vw, 15px); }
+.stage-title-links i { position: relative; display: block; height: 3px; border-radius: 999px; opacity: .9; }
+.stage-title-links i::after { content: ""; position: absolute; left: 50%; top: 50%; width: 7px; height: 7px; border: 2px solid white; border-radius: 50%; background: inherit; box-shadow: 0 0 0 1px currentColor; transform: translate(-50%, -50%); }
+.stage-title-links i:nth-child(1) { color: var(--teal); background: linear-gradient(90deg, transparent, var(--teal), transparent); }
+.stage-title-links i:nth-child(2) { color: var(--amber); background: linear-gradient(90deg, transparent, var(--amber), transparent); }
+.stage-title-links i:nth-child(3) { color: var(--green); background: linear-gradient(90deg, transparent, var(--green), transparent); }
 .stage-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(9px, 1vw, 15px); min-height: 0; }
 .stage-card { --accent: var(--green); position: relative; border: 1px solid var(--line); background: rgba(255,255,255,.93); border-radius: 19px; padding: clamp(12px, 1.5vw, 20px); text-align: right; cursor: pointer; overflow: hidden; box-shadow: 0 12px 35px rgba(23,52,41,.055); transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease; }
 .stage-card::before { content: ""; position: absolute; width: 150px; height: 150px; border-radius: 50%; background: color-mix(in srgb, var(--accent) 8%, transparent); left: -70px; top: -80px; }
@@ -231,11 +229,11 @@ button, a { -webkit-tap-highlight-color: transparent; }
   .download-link { display: none; }
   .mobile-filter-button { padding: 8px 9px; font-size: 9px; }
   .stage-section { gap: 4px; }
-  .stage-section-head { min-height: 29px; padding: 4px 8px; gap: 7px; border-radius: 9px; }
-  .stage-title-mark { gap: 2px; }
-  .stage-title-mark i { width: 12px; height: 2px; }
-  .stage-title-copy > span, .stage-title-rule { display: none; }
-  .stages-title { font-size: 11px; }
+  .stage-section-head { gap: 3px; }
+  .stage-section-head h2 { padding: 5px 13px; font-size: 10px; }
+  .stage-title-links { width: calc(100% - 12px); gap: 6px; }
+  .stage-title-links i { height: 2px; }
+  .stage-title-links i::after { width: 5px; height: 5px; border-width: 1px; }
   .stage-grid { gap: 6px; }
   .stage-card { border-radius: 13px; padding: 7px; }
   .stage-card-head { height: 17px; }

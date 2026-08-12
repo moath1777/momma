@@ -264,12 +264,8 @@ export default function Home() {
 
       <section className="stage-section" aria-labelledby="stages-title">
         <div className="stage-section-head">
-          <div className="stage-title-mark" aria-hidden="true"><i /><i /><i /></div>
-          <div className="stage-title-copy">
-            <span>مؤشرات النضج</span>
-            <h2 className="stages-title" id="stages-title">مراحل قياس مستوى نضج النموذج التشغيلي</h2>
-          </div>
-          <div className="stage-title-rule" aria-hidden="true" />
+          <h2 id="stages-title">مراحل قياس مستوى نضج النموذج التشغيلي</h2>
+          <div className="stage-title-links" aria-hidden="true"><i /><i /><i /></div>
         </div>
         <div className="stage-grid">
           {stages.map((stage) => {
