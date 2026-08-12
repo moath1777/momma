@@ -137,8 +137,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .stage-card.design { --accent: var(--teal); }
 .stage-card.activation { --accent: var(--amber); }
 .stage-card.operation { --accent: var(--green); }
-.stage-card-head { display: flex; justify-content: space-between; align-items: center; position: relative; z-index: 1; }
-.stage-number { color: var(--accent); font-size: 10px; font-weight: 900; letter-spacing: .1em; }
+.stage-card-head { display: flex; justify-content: flex-end; align-items: center; position: relative; z-index: 1; }
 .stage-status { font-size: 9px; padding: 5px 9px; border-radius: 999px; color: var(--accent); background: color-mix(in srgb, var(--accent) 9%, white); font-weight: 800; }
 .stage-card-main { height: calc(100% - 36px); min-height: 90px; display: flex; align-items: center; justify-content: space-between; gap: 14px; position: relative; z-index: 1; }
 .stage-card h2 { margin: 0 0 5px; font-size: clamp(17px, 1.8vw, 25px); }

@@ -38,10 +38,10 @@ const viewLabels: Record<ViewKey, string> = {
   subUnit: "الوحدات الفرعية",
 };
 
-const stageMeta: Record<Stage, { number: string; className: string; hint: string }> = {
-  التصميم: { number: "01", className: "design", hint: "جاهزية النموذج وهيكلته" },
-  التفعيل: { number: "02", className: "activation", hint: "تحويل التصميم إلى ممارسة" },
-  التشغيل: { number: "03", className: "operation", hint: "استدامة الأداء والمخرجات" },
+const stageMeta: Record<Stage, { className: string }> = {
+  التصميم: { className: "design" },
+  التفعيل: { className: "activation" },
+  التشغيل: { className: "operation" },
 };
 
 function weightedPercentage(items: DataRow[]) {
@@ -274,7 +274,6 @@ export default function Home() {
               onClick={() => { setActiveStage(stage); setPage(0); }}
             >
               <div className="stage-card-head">
-                <span className="stage-number">{meta.number}</span>
                 <span className="stage-status">{maturityLabel(value)}</span>
               </div>
               <div className="stage-card-main">
