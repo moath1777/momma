@@ -8,6 +8,8 @@ type ParsedData = { rows: Array<Record<string, string | number>>; stages: string
 
 const REQUIRED_SHEETS = ["الإدخال والحساب", "المرجع", "النتائج"];
 const REQUIRED_HEADERS = ["ID", "القطاع", "الوحدة التنظيمية الرئيسية", "الوحدة التنظيمية الفرعية", "المرحلة", "العنصر", "الوزن في المرحلة", "نسبة التحقق %", "الوزن المكتسب"];
+const LOCAL_WORKBOOK_NAME = "النموذج_التشغيلي_موحد_النسب (4).xlsx";
+const LOCAL_WORKBOOK_URL = `ms-excel:ofe|u|${encodeURI(`file:///C:/Users/moath/Documents/momma/${LOCAL_WORKBOOK_NAME}`)}`;
 
 function parseWorkbook(file: File): Promise<ParsedData> {
   return file.arrayBuffer().then((buffer) => {
@@ -112,7 +114,7 @@ export default function UploadPage() {
           <div className="versions-list">
             {versions.map((version) => (
               <article className={`version-card ${version.active ? "current" : ""}`} key={version.id}>
-                <div className="version-main"><span className="file-badge">XLSX</span><div><a href={`/api/versions/${version.id}/file`} target="_blank" rel="noreferrer">{version.filename}</a><small>{new Date(version.createdAt).toLocaleString("ar-SA")} · {version.rowCount} سجل · {(version.sizeBytes / 1024).toFixed(0)} KB</small><em>{version.stageNames.join(" · ")}</em></div></div>
+                <div className="version-main"><span className="file-badge">XLSX</span><div><a href={version.active ? LOCAL_WORKBOOK_URL : `/api/versions/${version.id}/file`} target={version.active ? undefined : "_blank"} rel={version.active ? undefined : "noreferrer"} title={version.active ? "فتح الملف المحلي في Excel" : "تنزيل ملف هذا الإصدار"}>{version.active ? LOCAL_WORKBOOK_NAME : version.filename}</a><small>{new Date(version.createdAt).toLocaleString("ar-SA")} · {version.rowCount} سجل · {(version.sizeBytes / 1024).toFixed(0)} KB</small><em>{version.stageNames.join(" · ")}</em></div></div>
                 <div className="version-actions">
                   {version.active ? <b>الإصدار الحالي</b> : <button disabled={busy} onClick={() => mutate(`/api/versions/${version.id}/activate`, "POST")}>استرجاع وتفعيل</button>}
                   {!version.active && <button className="danger" disabled={busy} onClick={() => mutate(`/api/versions/${version.id}`, "DELETE")}>حذف</button>}
