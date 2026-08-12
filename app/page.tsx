@@ -287,7 +287,6 @@ export default function Home() {
                 </div>
                 <div>
                   <h2>{stage}</h2>
-                  <p>{meta.hint}</p>
                 </div>
               </div>
               <div className="stage-track"><i style={{ width: `${value ?? 0}%` }} /></div>
