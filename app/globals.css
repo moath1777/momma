@@ -73,9 +73,6 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .analysis-head p { margin: 0 0 3px; color: var(--accent); font-size: 11px; font-weight: 800; letter-spacing: .02em; }
 .title-block h1 { margin: 0; font-size: clamp(20px, 2vw, 30px); letter-spacing: -.04em; line-height: 1.1; }
 
-.dataset-summary { display: flex; gap: 8px; margin-inline-start: auto; }
-.dataset-summary span { padding: 8px 12px; border: 1px solid var(--line); border-radius: 10px; background: rgba(255,255,255,.72); color: var(--muted); font-size: 11px; white-space: nowrap; }
-.dataset-summary b { color: var(--ink); font-size: 14px; margin-left: 3px; }
 
 .download-link, .mobile-filter-button {
   border: 1px solid var(--green);
@@ -144,7 +141,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .stage-card p { margin: 0; color: var(--muted); font-size: clamp(9px, .85vw, 12px); }
 .progress-ring { --progress: 0%; flex: 0 0 auto; width: clamp(78px, 7vw, 105px); aspect-ratio: 1; border-radius: 50%; display: grid; place-content: center; grid-auto-flow: column; align-items: baseline; color: var(--accent); background: radial-gradient(circle closest-side, white 78%, transparent 79% 99%), conic-gradient(var(--accent) var(--progress), #e8efec 0); direction: ltr; }
 .progress-ring span { font-size: clamp(20px, 2.1vw, 31px); font-weight: 900; letter-spacing: -.06em; }
-.progress-ring small { font-size: 10px; font-weight: 900; margin-left: 2px; }
+.progress-ring small { font-size: 12px; font-weight: 900; margin-left: 2px; }
 .stage-track { position: absolute; right: 0; bottom: 0; left: 0; height: 4px; background: #edf2f0; }
 .stage-track i { display: block; height: 100%; background: var(--accent); }
 
@@ -197,7 +194,6 @@ button, a { -webkit-tap-highlight-color: transparent; }
 @media (max-width: 900px) {
   .dashboard-shell { grid-template-rows: auto minmax(155px, 26vh) minmax(0, 1fr); }
   .filter-strip { display: none; }
-  .dataset-summary { display: none; }
   .mobile-filter-button { display: inline-block; margin-inline-start: auto; }
   .download-link { padding: 9px 11px; font-size: 10px; }
   .stage-card { padding: 11px; }
@@ -226,7 +222,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
   .stage-card-main { min-height: 72px; }
   .progress-ring { width: clamp(54px, 15vw, 69px); }
   .progress-ring span { font-size: clamp(17px, 5vw, 23px); }
-  .progress-ring small { font-size: 7px; }
+  .progress-ring small { font-size: 8px; }
   .analysis-panel { padding: 9px; border-radius: 14px; gap: 6px; }
   .analysis-head { grid-template-columns: 1fr; gap: 6px; }
   .analysis-head > div:first-child { display: none; }

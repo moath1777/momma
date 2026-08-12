@@ -179,7 +179,6 @@ export default function Home() {
   const safePage = Math.min(page, pageCount - 1);
   const visibleGroups = groups.slice(safePage * pageSize, safePage * pageSize + pageSize);
   const activeFilterCount = Object.values(filters).reduce((sum, values) => sum + values.length, 0);
-  const measuredUnits = new Set(filteredRows.map((row) => row.subUnit)).size;
 
   const detailRows = detail
     ? filteredRows.filter((row) => row.stage === activeStage && row[detail.view] === detail.name)
@@ -242,10 +241,6 @@ export default function Home() {
         <div className="title-block">
           <p>لوحة الأداء المؤسسي</p>
           <h1>قياس نضج النموذج التشغيلي</h1>
-        </div>
-        <div className="dataset-summary">
-          <span><b>{measuredUnits}</b> وحدة مقاسة</span>
-          <span><b>{filteredRows.length}</b> سجل نشط</span>
         </div>
         <button className="mobile-filter-button" type="button" onClick={() => setMobileFiltersOpen(true)}>
           الفلاتر {activeFilterCount ? `(${activeFilterCount})` : ""}
