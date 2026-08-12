@@ -263,7 +263,14 @@ export default function Home() {
       </section>
 
       <section className="stage-section" aria-labelledby="stages-title">
-        <h2 className="stages-title" id="stages-title">مراحل قياس مستوى نضج النموذج التشغيلي</h2>
+        <div className="stage-section-head">
+          <div className="stage-title-mark" aria-hidden="true"><i /><i /><i /></div>
+          <div className="stage-title-copy">
+            <span>مؤشرات النضج</span>
+            <h2 className="stages-title" id="stages-title">مراحل قياس مستوى نضج النموذج التشغيلي</h2>
+          </div>
+          <div className="stage-title-rule" aria-hidden="true" />
+        </div>
         <div className="stage-grid">
           {stages.map((stage) => {
           const value = metrics[stage];
