@@ -156,7 +156,17 @@ const worker = {
     const apiResponse = await handleApi(request, env);
     if (apiResponse) return apiResponse;
 
-    return handler.fetch(request, env, ctx);
+    const response = await handler.fetch(request, env, ctx);
+    const contentType = response.headers.get("content-type") ?? "";
+    if (request.method === "GET" && contentType.includes("text/html")) {
+      const headers = new Headers(response.headers);
+      headers.set("cache-control", "no-store, no-cache, must-revalidate, max-age=0");
+      headers.set("pragma", "no-cache");
+      headers.set("expires", "0");
+      headers.set("clear-site-data", '"cache"');
+      return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
+    }
+    return response;
   },
 };
 
