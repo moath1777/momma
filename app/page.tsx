@@ -152,6 +152,7 @@ function MultiSelect({
 
 export default function Home() {
   const [data, setData] = useState<DataPayload>(defaultData);
+  const [activeDataReady, setActiveDataReady] = useState(false);
   const [activeVersionId, setActiveVersionId] = useState<string | null>(null);
   const [filters, setFilters] = useState<FilterState>(emptyFilters);
   const [openFilter, setOpenFilter] = useState<FilterKey | null>(null);
@@ -178,11 +179,12 @@ export default function Home() {
   };
 
   useEffect(() => {
-    const refreshData = () => fetch("/api/data", { cache: "no-store" })
+    const refreshData = () => fetch(`/api/data?refresh=${Date.now()}`, { cache: "no-store" })
       .then((response) => response.ok ? response.json() : null)
       .then((result) => {
         const nextData = result?.data ? normalizeData(result.data) : null;
         if (!nextData) return;
+        setActiveDataReady(true);
         if (loadedVersionId.current === result.id) return;
         loadedVersionId.current = result.id;
         setData(nextData);
@@ -301,6 +303,18 @@ export default function Home() {
     setFilters(emptyFilters);
     setOpenFilter(null);
     setPage(0);
+  }
+
+  if (!activeDataReady) {
+    return (
+      <main className="dashboard-shell" aria-busy="true">
+        <div style={{ minHeight: "calc(100vh - 36px)", display: "grid", placeItems: "center" }}>
+          <div style={{ padding: "22px 28px", border: "1px solid #dce8e2", borderRadius: 18, color: "#1d7549", background: "rgba(255,255,255,.94)", boxShadow: "0 14px 35px rgba(23,52,41,.06)", fontWeight: 900 }}>
+            جارٍ تحميل الإصدار الحالي من البيانات...
+          </div>
+        </div>
+      </main>
+    );
   }
 
   const filterControls = (
