@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import * as XLSX from "xlsx";
 
 type Version = { id: string; filename: string; createdAt: string; uploadedBy?: string; sizeBytes: number; rowCount: number; stageNames: string[]; active: boolean };
@@ -10,6 +10,49 @@ const REQUIRED_SHEETS = ["الإدخال والحساب", "المرجع", "ال�
 const REQUIRED_HEADERS = ["ID", "القطاع", "الوحدة التنظيمية الرئيسية", "الوحدة التنظيمية الفرعية", "المرحلة", "العنصر", "الوزن في المرحلة", "نسبة التحقق %", "الوزن المكتسب"];
 const LOCAL_WORKBOOK_NAME = "النموذج_التشغيلي_موحد_النسب (4).xlsx";
 const LOCAL_WORKBOOK_URL = "ms-excel:ofe|u|file:///C:/Users/moath/Documents/momma/operating-model-maturity.xlsx";
+const LOCAL_SYNC_DB = "maturity-local-sync";
+const LOCAL_SYNC_STORE = "settings";
+const LOCAL_SYNC_KEY = "linked-workbook";
+const LOCAL_SYNC_FINGERPRINT_KEY = "maturity-last-synced-fingerprint";
+
+type LocalFileHandle = {
+  kind: "file";
+  name: string;
+  getFile: () => Promise<File>;
+  queryPermission?: (options?: { mode?: "read" }) => Promise<PermissionState>;
+  requestPermission?: (options?: { mode?: "read" }) => Promise<PermissionState>;
+};
+
+function fileFingerprint(file: File) {
+  return `${file.name}:${file.size}:${file.lastModified}`;
+}
+
+function openLocalSyncDatabase() {
+  return new Promise<IDBDatabase>((resolve, reject) => {
+    const request = indexedDB.open(LOCAL_SYNC_DB, 1);
+    request.onupgradeneeded = () => request.result.createObjectStore(LOCAL_SYNC_STORE);
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+async function readLinkedWorkbook() {
+  const db = await openLocalSyncDatabase();
+  return new Promise<LocalFileHandle | null>((resolve, reject) => {
+    const request = db.transaction(LOCAL_SYNC_STORE, "readonly").objectStore(LOCAL_SYNC_STORE).get(LOCAL_SYNC_KEY);
+    request.onsuccess = () => { db.close(); resolve((request.result as LocalFileHandle | undefined) ?? null); };
+    request.onerror = () => { db.close(); reject(request.error); };
+  });
+}
+
+async function saveLinkedWorkbook(handle: LocalFileHandle) {
+  const db = await openLocalSyncDatabase();
+  return new Promise<void>((resolve, reject) => {
+    const request = db.transaction(LOCAL_SYNC_STORE, "readwrite").objectStore(LOCAL_SYNC_STORE).put(handle, LOCAL_SYNC_KEY);
+    request.onsuccess = () => { db.close(); resolve(); };
+    request.onerror = () => { db.close(); reject(request.error); };
+  });
+}
 
 function parseWorkbook(file: File): Promise<ParsedData> {
   return file.arrayBuffer().then((buffer) => {
@@ -46,17 +89,21 @@ export default function UploadPage() {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [linkedWorkbook, setLinkedWorkbook] = useState<LocalFileHandle | null>(null);
+  const [syncState, setSyncState] = useState("غير مرتبط");
+  const lastSyncedFingerprint = useRef<string | null>(null);
+  const syncing = useRef(false);
 
-  async function loadVersions() {
+  const loadVersions = useCallback(async () => {
     const response = await fetch("/api/versions", { cache: "no-store" });
     if (!response.ok) throw new Error("تعذر تحميل الإصدارات.");
     setVersions((await response.json()).versions);
-  }
-  useEffect(() => { loadVersions().catch((reason) => setError(reason.message)); }, []);
+  }, []);
 
-  async function upload(file?: File) {
-    if (!file) return;
-    setBusy(true); setError(""); setMessage("جارٍ فحص الملف...");
+  const syncWorkbook = useCallback(async (file: File, automatic = false) => {
+    if (syncing.current) return;
+    syncing.current = true;
+    setBusy(true); setError(""); setMessage(automatic ? "تم رصد تعديل في ملف Excel..." : "جارٍ فحص الملف...");
     try {
       if (!file.name.toLowerCase().endsWith(".xlsx")) throw new Error("الملف يجب أن يكون بصيغة XLSX.");
       const data = await parseWorkbook(file);
@@ -65,10 +112,56 @@ export default function UploadPage() {
       const response = await fetch("/api/versions", { method: "POST", body: form });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || "تعذر رفع الملف.");
-      await loadVersions(); setMessage("تم رفع الملف وتفعيل الإصدار الجديد. لوحة التحليل تستخدم بياناته الآن.");
+      lastSyncedFingerprint.current = fileFingerprint(file);
+      localStorage.setItem(LOCAL_SYNC_FINGERPRINT_KEY, lastSyncedFingerprint.current);
+      await loadVersions();
+      setSyncState(`متصل — آخر مزامنة ${new Date().toLocaleTimeString("ar-SA")}`);
+      setMessage(automatic ? "تمت مزامنة تعديل الملف وتحديث لوحة التحليل الآن." : "تم رفع الملف وتفعيل الإصدار الجديد. لوحة التحليل تستخدم بياناته الآن.");
     } catch (reason) { setError(reason instanceof Error ? reason.message : "تعذر معالجة الملف."); setMessage(""); }
-    finally { setBusy(false); }
+    finally { syncing.current = false; setBusy(false); }
+  }, [loadVersions]);
+
+  async function upload(file?: File) {
+    if (file) await syncWorkbook(file);
   }
+
+  async function linkWorkbook() {
+    setError("");
+    try {
+      const picker = (window as typeof window & { showOpenFilePicker?: (options: { multiple: false; types: Array<{ description: string; accept: Record<string, string[]> }> }) => Promise<LocalFileHandle[]> }).showOpenFilePicker;
+      if (!picker) throw new Error("هذا المتصفح لا يدعم ربط ملف محلي للمزامنة. افتح الموقع في Microsoft Edge أو Google Chrome.");
+      const [handle] = await picker({ multiple: false, types: [{ description: "Excel workbook", accept: { "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [".xlsx"] } }] });
+      if (!handle) return;
+      await saveLinkedWorkbook(handle);
+      setLinkedWorkbook(handle); setSyncState("جارٍ التحقق والمزامنة الأولى...");
+      await syncWorkbook(await handle.getFile());
+    } catch (reason) { setError(reason instanceof Error ? reason.message : "تعذر ربط الملف."); }
+  }
+
+  useEffect(() => {
+    loadVersions().catch((reason) => setError(reason.message));
+    readLinkedWorkbook().then(async (handle) => {
+      if (!handle) return;
+      const permission = await handle.queryPermission?.({ mode: "read" });
+      if (permission !== "granted") { setSyncState("يلزم إعادة تأكيد ربط الملف"); return; }
+      setLinkedWorkbook(handle);
+      const file = await handle.getFile();
+      lastSyncedFingerprint.current = localStorage.getItem(LOCAL_SYNC_FINGERPRINT_KEY);
+      if (lastSyncedFingerprint.current !== fileFingerprint(file)) await syncWorkbook(file, true);
+      else setSyncState(`متصل — آخر ملف تمت مزامنته`);
+    }).catch(() => setSyncState("غير مرتبط"));
+  }, [loadVersions, syncWorkbook]);
+
+  useEffect(() => {
+    if (!linkedWorkbook) return;
+    const watch = window.setInterval(async () => {
+      try {
+        const file = await linkedWorkbook.getFile();
+        if (lastSyncedFingerprint.current !== fileFingerprint(file)) await syncWorkbook(file, true);
+      } catch { setSyncState("تعذر الوصول للملف المرتبط"); }
+    }, 4000);
+    return () => window.clearInterval(watch);
+  }, [linkedWorkbook, syncWorkbook]);
 
   async function mutate(url: string, method: "POST" | "DELETE") {
     setBusy(true); setError(""); setMessage("");
@@ -91,6 +184,10 @@ export default function UploadPage() {
 
       <section className="upload-layout">
         <div className="upload-column">
+          <section style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, padding: "14px 16px", border: `1px solid ${linkedWorkbook ? "#8ab89b" : "#d8e5de"}`, borderRadius: 16, background: linkedWorkbook ? "linear-gradient(135deg, #f4fbf6, #e4f3e9)" : "linear-gradient(135deg, #f8fcf9, #edf6f0)", boxShadow: "0 9px 24px rgba(23,52,41,.04)" }}>
+            <div style={{ minWidth: 0, display: "grid", gap: 3 }}><p style={{ margin: 0, color: "var(--green)", fontSize: 9, fontWeight: 900 }}>مزامنة الملف المحلي</p><strong style={{ overflow: "hidden", maxWidth: 255, color: "var(--ink)", fontSize: 11, textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{linkedWorkbook ? linkedWorkbook.name : "اربط ملف Excel لتحديث الموقع تلقائيًا"}</strong><small style={{ color: "var(--muted)", fontSize: 8 }}>{syncState}</small></div>
+            <button type="button" disabled={busy} onClick={linkWorkbook} style={{ flex: "0 0 auto", border: 0, borderRadius: 9, padding: "9px 11px", color: "white", background: "var(--green)", fontSize: 9, fontWeight: 900, cursor: busy ? "wait" : "pointer", opacity: busy ? .55 : 1 }}>{linkedWorkbook ? "تغيير الملف" : "ربط الملف"}</button>
+          </section>
           <label className={`upload-dropzone ${busy ? "disabled" : ""}`}>
             <input type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" disabled={busy} onChange={(event) => upload(event.target.files?.[0])} />
             <span className="upload-icon">↑</span><strong>{busy ? "جارٍ المعالجة..." : "اختر ملف Excel"}</strong><small>أو اسحب الملف هنا — الحد الأقصى 15 MB</small>
@@ -105,7 +202,7 @@ export default function UploadPage() {
               <li>عمود المرحلة يجب أن يحتوي على ثلاث مراحل؛ ويمكن تغيير أسمائها وسيعكسها الموقع.</li>
               <li>نسبة التحقق بين 0 و100؛ والقيم العشرية مثل 0.1 تُحوّل إلى 10%.</li>
             </ul>
-            <p>ملاحظة: بعد تعديل الملف على جهازك، أعد رفعه لإنشاء إصدار جديد. المتصفح لا يستطيع مراقبة ملف محلي مغلق أو مفتوح تلقائيًا.</p>
+            <p>للتحديث التلقائي: اضغط «ربط الملف» مرة واحدة، واختر ملف Excel. ما دامت صفحة رفع البيانات مفتوحة، يلتقط الموقع الحفظ الجديد ويحدّث لوحة التحليل تلقائيًا.</p>
           </article>
         </div>
 
