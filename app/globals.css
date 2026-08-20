@@ -426,7 +426,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .org-chart { min-width: max-content; display: grid; justify-items: center; padding-bottom: 8px; }
 .org-root-wrap { display: grid; justify-items: center; }
 .org-trunk { width: 2px; height: 38px; background: #9fb9ac; }
-.org-branches { position: relative; min-width: 100%; display: flex; align-items: flex-start; justify-content: center; gap: 22px; padding-top: 32px; }
+.org-branches { position: relative; width: max-content; min-width: 0; display: flex; align-items: flex-start; justify-content: center; gap: 22px; padding-top: 32px; }
 .org-branches::before { content: ""; position: absolute; top: 0; right: 120px; left: 120px; height: 1px; background: #9fb9ac; }
 .org-branch { position: relative; width: 240px; display: grid; justify-items: stretch; gap: 18px; }
 .org-branch-line { position: absolute; top: -32px; right: 50%; width: 1px; height: 32px; background: #9fb9ac; }
@@ -444,7 +444,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .org-children::before { content: ""; position: absolute; top: 0; right: 0; left: 50%; height: 1px; background: #9fb9ac; }
 .org-children .org-node { position: relative; min-height: 62px; background: #fff; }
 .org-children .org-node::before { content: ""; position: absolute; right: -19px; top: 50%; width: 18px; height: 1px; background: #9fb9ac; }
-.org-children::after { content: ""; position: absolute; right: 0; top: 0; bottom: 28px; width: 1px; background: #9fb9ac; }
+.org-children::after { content: ""; position: absolute; right: 0; top: 0; bottom: 31px; width: 1px; background: #9fb9ac; }
 
 /* Every military unit reports directly to the military group. The first
    column contains the six command nodes highlighted in the source reference. */
