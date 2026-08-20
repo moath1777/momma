@@ -196,14 +196,9 @@ export default function Home() {
     return sizes.map((size, index) => {
       const branches = orderedBranches.slice(offset, offset + size);
       offset += size;
-      return { id: `military-column-${index + 1}`, tone: ["green", "olive", "olive", "gray"][index], branches };
+      return { id: `military-column-${index + 1}`, featured: index === 0, branches };
     });
   }, [mainBranches]);
-
-  const militarySections = useMemo(() => [
-    { label: "القيادة والعمليات", columns: militaryColumns.slice(0, 2) },
-    { label: "الإسناد والخدمات", columns: militaryColumns.slice(2, 4) },
-  ], [militaryColumns]);
 
   const modalRows = useMemo(() => {
     if (!openStage) return [];
@@ -299,40 +294,23 @@ export default function Home() {
             </div>
             <div className="org-trunk" aria-hidden="true" />
             {activeGroup === "الجهاز العسكري" ? (
-              <div className="military-command-map">
-                {militarySections.map((section) => {
-                  const sectionUnits = section.columns.flatMap((column) => column.branches.flatMap((branch) => branch.units));
-                  const sectionId = `main:${activeGroup}:${section.label}`;
-                  return (
-                    <section className="military-command-section" key={section.label}>
-                      <div className="military-command">
-                        <OrgNode
-                          label={section.label}
-                          selected={activeNode.id === sectionId}
-                          onClick={() => selectMain(section.label, sectionUnits)}
-                        />
-                      </div>
-                      <div className="military-section-columns">
-                        {section.columns.map((column) => (
-                          <div className={`military-column tone-${column.tone}`} key={column.id}>
-                            {column.branches.map((branch) => {
-                              const mainId = `main:${activeGroup}:${branch.mainUnit}`;
-                              return (
-                                <div className="military-unit" key={branch.mainUnit}>
-                                  <OrgNode
-                                    label={branch.mainUnit}
-                                    selected={activeNode.id === mainId}
-                                    onClick={() => selectMain(branch.mainUnit, branch.units)}
-                                  />
-                                </div>
-                              );
-                            })}
-                          </div>
-                        ))}
-                      </div>
-                    </section>
-                  );
-                })}
+              <div className="military-direct-map">
+                {militaryColumns.map((column) => (
+                  <div className={`military-column ${column.featured ? "featured" : ""}`} key={column.id}>
+                    {column.branches.map((branch) => {
+                      const mainId = `main:${activeGroup}:${branch.mainUnit}`;
+                      return (
+                        <div className="military-unit" key={branch.mainUnit}>
+                          <OrgNode
+                            label={branch.mainUnit}
+                            selected={activeNode.id === mainId}
+                            onClick={() => selectMain(branch.mainUnit, branch.units)}
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+                ))}
               </div>
             ) : (
               <div className="org-branches">

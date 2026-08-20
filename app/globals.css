@@ -446,30 +446,21 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .org-children .org-node::before { content: ""; position: absolute; right: -19px; top: 50%; width: 18px; height: 1px; background: #9fb9ac; }
 .org-children::after { content: ""; position: absolute; right: 0; top: 0; bottom: 28px; width: 1px; background: #9fb9ac; }
 
-/* The military chart follows its own command layout: two command groups feed
-   four compact vertical unit columns, matching the supplied reference. */
+/* Every military unit reports directly to the military group. The first
+   column contains the six command nodes highlighted in the source reference. */
 .military-organization .org-chart-scroll { overflow-x: hidden; }
 .military-organization .org-chart { min-width: 0; width: 100%; }
-.military-organization .org-trunk { height: 26px; }
-.military-command-map { position: relative; width: min(100%, 940px); display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 54px; padding: 28px 12px 10px; }
-.military-command-map::before { content: ""; position: absolute; top: 0; right: calc(25% - 8px); left: calc(25% - 8px); height: 1px; background: #6f9c7f; }
-.military-command-section { position: relative; min-width: 0; display: grid; justify-items: center; }
-.military-command-section::before { content: ""; position: absolute; top: -29px; right: 50%; width: 1px; height: 30px; background: #6f9c7f; }
-.military-command { position: relative; z-index: 2; width: min(250px, 78%); }
-.military-command::after { content: ""; position: absolute; right: 50%; bottom: -25px; width: 1px; height: 26px; background: #6f9c7f; }
-.military-command .org-node { width: 100%; min-height: 64px; color: #fff; border-color: #377c4d; border-radius: 3px; background: #418943; box-shadow: 0 7px 18px rgba(31,86,48,.13); }
-.military-command .org-node.selected { border-color: #0d6332; background: #0d6332; }
-.military-section-columns { position: relative; width: 100%; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 24px; padding-top: 18px; }
-.military-section-columns::before { content: ""; position: absolute; top: 0; right: 0; left: calc(50% - 8px); height: 1px; background: #6f9c7f; }
-.military-column { position: relative; min-width: 0; display: grid; align-content: start; gap: 8px; padding-right: 18px; }
-.military-column::before { content: ""; position: absolute; top: -19px; right: 0; bottom: 30px; width: 1px; background: #6f9c7f; }
+.military-organization .org-trunk { height: 28px; }
+.military-direct-map { position: relative; width: min(100%, 980px); display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; padding: 28px 10px 10px; }
+.military-direct-map::before { content: ""; position: absolute; top: 0; right: 10px; left: calc(25% - 10px); height: 1px; background: #9fb9ac; }
+.military-column { position: relative; min-width: 0; display: grid; align-content: start; gap: 10px; padding-right: 18px; }
+.military-column::before { content: ""; position: absolute; top: -29px; right: 0; bottom: 31px; width: 1px; background: #9fb9ac; }
 .military-unit { position: relative; min-width: 0; }
-.military-unit::before { content: ""; position: absolute; top: 50%; right: -19px; width: 20px; height: 1px; background: #6f9c7f; }
-.military-unit .org-node { width: 100%; min-height: 56px; padding: 8px 9px; border-radius: 3px; box-shadow: 0 5px 14px rgba(31,65,43,.075); }
-.military-column.tone-green .org-node { border-color: #7baa7b; background: #e9f3e7; }
-.military-column.tone-olive .org-node { border-color: #a79b72; background: #f2efe4; }
-.military-column.tone-gray .org-node { border-color: #b8c0c2; background: #eef1f2; }
-.military-organization .org-node-copy strong { overflow: visible; font-size: 10px; white-space: normal; text-overflow: clip; }
+.military-unit::before { content: ""; position: absolute; top: 50%; right: -19px; width: 20px; height: 1px; background: #9fb9ac; }
+.military-unit .org-node { width: 100%; min-height: 62px; }
+.military-column.featured .org-node { border-color: #7baa7b; background: #e9f3e7; }
+.military-column.featured .org-node.selected { border-color: var(--green); background: linear-gradient(135deg, #eef8ef, #d8ecd9); }
+.military-organization .org-node-copy strong { overflow: visible; white-space: normal; text-overflow: clip; }
 
 .checkpoint-backdrop { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; padding: 18px; background: rgba(10,30,22,.56); backdrop-filter: blur(7px); }
 .checkpoint-modal { --checkpoint-accent: var(--green); width: min(1040px, 96vw); max-height: 91dvh; overflow: hidden; display: grid; grid-template-rows: auto minmax(0, 1fr); border-radius: 22px; background: #f7faf8; box-shadow: 0 32px 90px rgba(7,25,18,.34); }
@@ -509,11 +500,8 @@ button, a { -webkit-tap-highlight-color: transparent; }
   .organization-tabs { width: 100%; overflow-x: auto; }
   .organization-tabs button { flex: 1 0 auto; }
   .organization-legend { display: none; }
-  .military-command-map { width: 100%; gap: 28px; }
-  .military-command-map::before { right: calc(25% - 1px); left: calc(25% - 1px); }
-  .military-command { width: min(230px, 84%); }
-  .military-section-columns { gap: 10px; }
-  .military-section-columns::before { left: calc(50% - 5px); }
+  .military-direct-map { width: 100%; gap: 12px; }
+  .military-direct-map::before { left: calc(25% - 6px); }
 }
 
 @media (max-width: 680px) {
@@ -535,14 +523,11 @@ button, a { -webkit-tap-highlight-color: transparent; }
   .organization-tabs button { padding: 8px 9px; font-size: 8px; }
   .org-chart-scroll { padding: 20px 14px 34px; }
   .military-organization .org-chart-scroll { overflow-x: auto; padding-inline: 10px; }
-  .military-command-map { min-width: 640px; gap: 22px; padding-inline: 8px; }
-  .military-command-map::before { right: calc(25% - 2px); left: calc(25% - 2px); }
-  .military-command { width: 210px; }
-  .military-section-columns { gap: 8px; }
-  .military-section-columns::before { left: calc(50% - 4px); }
+  .military-direct-map { min-width: 680px; gap: 9px; padding-inline: 8px; }
+  .military-direct-map::before { right: 8px; left: calc(25% - 5px); }
   .military-column { gap: 7px; padding-right: 15px; }
   .military-unit::before { right: -16px; width: 17px; }
-  .military-unit .org-node { min-height: 54px; padding: 7px 6px; }
+  .military-unit .org-node { min-height: 58px; padding: 9px 7px; }
   .military-organization .org-node-copy strong { font-size: 9px; }
   .checkpoint-backdrop { padding: 8px; }
   .checkpoint-modal { width: 100%; max-height: 94dvh; border-radius: 17px; }
