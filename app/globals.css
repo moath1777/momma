@@ -396,8 +396,8 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .maturity-stage-heading small { display: block; margin-bottom: 3px; color: var(--muted); font-size: 8px; }
 .maturity-stage-heading h2 { overflow: hidden; margin: 0; font-size: clamp(15px, 1.5vw, 21px); text-overflow: ellipsis; white-space: nowrap; }
 .maturity-stage-score { --stage-progress: 0%; flex: 0 0 auto; width: clamp(76px, 6.7vw, 98px); aspect-ratio: 1; display: grid; place-content: center; grid-auto-flow: column; align-items: baseline; gap: 2px; border-radius: 50%; color: var(--stage-accent); background: radial-gradient(circle closest-side, #fff 78%, transparent 79% 99%), conic-gradient(var(--stage-accent) var(--stage-progress), #e6ece9 0); direction: ltr; }
-.maturity-stage-score strong { font-size: clamp(22px, 2.15vw, 31px); letter-spacing: -.06em; }
-.maturity-stage-score span { font-size: clamp(16px, 1.55vw, 23px); font-weight: 900; line-height: 1; }
+.maturity-stage-score strong { font-size: clamp(19px, 1.85vw, 27px); letter-spacing: -.06em; }
+.maturity-stage-score span { font-size: clamp(13px, 1.15vw, 17px); font-weight: 900; line-height: 1; }
 .maturity-stage-foot { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .maturity-stage-foot > span { color: var(--stage-accent); font-size: 8px; font-weight: 900; }
 .maturity-dots { display: flex; gap: 3px; padding: 3px; border-radius: 99px; background: #f0f4f2; }
@@ -500,8 +500,8 @@ button, a { -webkit-tap-highlight-color: transparent; }
   .maturity-stage-heading > span, .maturity-stage-heading small, .maturity-stage-foot { display: none; }
   .maturity-stage-heading h2 { max-width: 25vw; font-size: 11px; }
   .maturity-stage-score { grid-row: 1; width: 68px; gap: 1px; }
-  .maturity-stage-score strong { font-size: 20px; }
-  .maturity-stage-score span { font-size: 15px; }
+  .maturity-stage-score strong { font-size: 18px; }
+  .maturity-stage-score span { font-size: 13px; }
   .organization-head { gap: 9px; padding: 11px; }
   .organization-head > div:first-child { display: none; }
   .organization-tabs button { padding: 8px 9px; font-size: 8px; }
