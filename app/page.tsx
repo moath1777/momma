@@ -273,7 +273,7 @@ export default function Home() {
         })}
       </section>
 
-      <section className="organization-panel">
+      <section className={`organization-panel ${activeGroup === "الجهاز العسكري" ? "military-organization" : ""}`}>
         <div className="organization-head">
           <div><p>الهيكل التنظيمي</p><h2>اختر المجموعة ثم الوحدة المطلوب تحليلها</h2></div>
           <div className="organization-tabs" role="tablist" aria-label="المجموعات التنظيمية">
