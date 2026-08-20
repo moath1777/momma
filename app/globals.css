@@ -451,7 +451,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .military-organization .org-chart-scroll { overflow-x: hidden; }
 .military-organization .org-chart { min-width: 0; width: 100%; }
 .military-organization .org-trunk { height: 28px; }
-.military-direct-map { position: relative; width: min(100%, 980px); display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; padding: 28px 10px 10px; }
+.military-direct-map { position: relative; width: min(100%, 980px); display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); align-items: start; gap: 20px; padding: 28px 10px 10px; }
 .military-direct-map::before { content: ""; position: absolute; top: 0; right: 10px; left: calc(25% - 10px); height: 1px; background: #9fb9ac; }
 .military-column { position: relative; min-width: 0; display: grid; align-content: start; gap: 10px; padding-right: 18px; }
 .military-column::before { content: ""; position: absolute; top: -29px; right: 0; bottom: 31px; width: 1px; background: #9fb9ac; }
