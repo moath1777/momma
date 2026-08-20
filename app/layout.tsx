@@ -8,7 +8,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const protocol = incoming.get("x-forwarded-proto") ?? (host.includes("localhost") ? "http" : "https");
   const imageUrl = `${protocol}://${host}/og.png`;
   const title = "قياس نضج النموذج التشغيلي";
-  const description = "لوحة تحليلية تفاعلية لقياس نسب تحقق مراحل التصميم والتفعيل والتشغيل.";
+  const description = "لوحة هيكل تنظيمي تفاعلية لقياس مراحل التصميم والبناء المؤسسي والتشغيل وعرض نقاط التحقق.";
 
   return {
     title,

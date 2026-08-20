@@ -74,7 +74,7 @@ async function handleApi(request: Request, env: Env): Promise<Response | null> {
     if (file.size > 15 * 1024 * 1024) return json({ error: "حجم الملف يتجاوز 15 ميجابايت." }, 400);
     let parsed: any;
     try { parsed = JSON.parse(dataText); } catch { return json({ error: "تعذر قراءة البيانات المحللة." }, 400); }
-    if (!Array.isArray(parsed.rows) || parsed.rows.length === 0 || !Array.isArray(parsed.stages) || parsed.stages.length === 0) {
+    if (!Array.isArray(parsed.rows) || parsed.rows.length === 0 || !Array.isArray(parsed.units) || parsed.units.length === 0 || !Array.isArray(parsed.scores) || parsed.scores.length === 0 || !Array.isArray(parsed.stages) || parsed.stages.length !== 3 || !Array.isArray(parsed.groups) || parsed.groups.length !== 3) {
       return json({ error: "هيكل البيانات غير صالح." }, 400);
     }
     const id = crypto.randomUUID();

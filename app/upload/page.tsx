@@ -2,11 +2,11 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  COLUMN_KEYS,
-  DEFAULT_COLUMN_LABELS,
+  GROUP_SHEETS,
   LOCAL_SYNC_FINGERPRINT_KEY,
   LOCAL_WORKBOOK_NAME,
   LOCAL_WORKBOOK_URL,
+  REQUIRED_SHEETS,
   fileFingerprint,
   parseWorkbook,
   readLinkedWorkbook,
@@ -62,9 +62,6 @@ export default function UploadPage() {
       if (!picker) throw new Error("هذا المتصفح لا يدعم ربط ملف محلي للمزامنة. افتح الموقع في Microsoft Edge أو Google Chrome.");
       const [handle] = await picker({ multiple: false, types: [{ description: "Excel workbook", accept: { "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [".xlsx"] } }] });
       if (!handle) return;
-      if (handle.name !== LOCAL_WORKBOOK_NAME) {
-        throw new Error(`اختر الملف المرتبط بالإصدار الحالي: ${LOCAL_WORKBOOK_NAME}`);
-      }
       await saveLinkedWorkbook(handle);
       setLinkedWorkbook(handle); setSyncState("جارٍ التحقق والمزامنة الأولى...");
       await syncWorkbook(await handle.getFile());
@@ -113,7 +110,7 @@ export default function UploadPage() {
         <nav className="site-nav" aria-label="التنقل الرئيسي"><a href="/">لوحة التحليل</a><a href="/guide">الدليل الإرشادي</a><a className="active" href="/upload">رفع البيانات</a></nav>
       </header>
 
-      <section className="page-hero upload-hero"><p>إدارة مصدر البيانات</p><h1>رفع البيانات والإصدارات</h1><span>ارفع ملفًا مطابقًا للهيكل؛ يُحفظ كإصدار مستقل وتنعكس بياناته على اللوحة بعد التفعيل.</span></section>
+      <section className="page-hero upload-hero"><p>إدارة مصدر البيانات</p><h1>رفع بيانات الهيكل التنظيمي</h1><span>ارفع ملف القياس الجديد؛ يُفحص على مستوى الوحدات ونقاط التحقق، ثم تُحدّث المخططات التنظيمية ودرجات المراحل مباشرة.</span></section>
 
       <section className="upload-layout">
         <div className="upload-column">
@@ -130,13 +127,14 @@ export default function UploadPage() {
             <h2>شروط ملف Excel</h2>
             <ul>
               <li>الصيغة المطلوبة: <b>XLSX</b>، والحجم لا يتجاوز 15 MB.</li>
-              <li>الشيتات المطلوبة بالأسماء نفسها: <b>الإدخال والحساب، المرجع، النتائج</b>.</li>
-              <li>الأعمدة التسعة الأولى يجب أن تبقى بالترتيب الوظيفي التالي: {COLUMN_KEYS.map((key) => DEFAULT_COLUMN_LABELS[key]).join("، ")}.</li>
-              <li>يمكن تغيير أسماء الأعمدة؛ سيعرض الموقع الاسم الجديد مع بقاء وظيفة العمود مرتبطة بموقعه في الترتيب.</li>
-              <li>عمود المرحلة يجب أن يحتوي على ثلاث مراحل؛ ويمكن تغيير أسماء المراحل وسيعرضها الموقع كما هي.</li>
-              <li>نسبة التحقق بين 0 و100؛ والقيم العشرية مثل 0.1 تُحوّل إلى 10%.</li>
+              <li>الشيتات المطلوبة بالأسماء نفسها: <b>{REQUIRED_SHEETS.join("، ")}</b>.</li>
+              <li>يجب أن تحتوي «قائمة الوحدات» على كود فريد لكل وحدة، ومجموعتها، ووحدتها الرئيسية والفرعية والوحدة المقاسة.</li>
+              <li>أوراق الإدخال الثلاث — <b>{GROUP_SHEETS.join("، ")}</b> — يجب أن تحتفظ بأعمدة الوحدة والمرحلة والعنصر وكود ونص نقطة التحقق ونسبة الإنجاز.</li>
+              <li>شيت «النتائج» يجب أن يحتوي على 3 مراحل بالضبط ودرجة من 0 إلى 100 لكل وحدة في كل مرحلة.</li>
+              <li>نسبة إنجاز نقطة التحقق يجب أن تكون رقمًا بين 0 و100، ويرتبط كل سجل بكود وحدة موجود في «قائمة الوحدات».</li>
+              <li>يمكن اختلاف ترتيب الأعمدة، لكن يجب الحفاظ على أسماء الأعمدة المطلوبة كما هي.</li>
             </ul>
-            <p>للتحديث التلقائي: اضغط «ربط الملف» مرة واحدة، واختر <b>{LOCAL_WORKBOOK_NAME}</b>. ما دام الموقع مفتوحًا على لوحة التحليل أو صفحة رفع البيانات، يلتقط الحفظ الجديد ويحدّث اللوحة تلقائيًا.</p>
+            <p>للتحديث التلقائي: اضغط «ربط الملف» مرة واحدة واختر ملف Excel الحالي. ما دام الموقع مفتوحًا على لوحة التحليل أو صفحة رفع البيانات، يلتقط الحفظ الجديد ويحدّث اللوحة تلقائيًا. الملف الافتراضي داخل المشروع هو <b>{LOCAL_WORKBOOK_NAME}</b>.</p>
           </article>
         </div>
 
@@ -145,7 +143,7 @@ export default function UploadPage() {
           <div className="versions-list">
             {versions.map((version) => (
               <article className={`version-card ${version.active ? "current" : ""}`} key={version.id}>
-                <div className="version-main"><span className="file-badge">XLSX</span><div><a href={version.active ? LOCAL_WORKBOOK_URL : `/api/versions/${version.id}/file`} target={version.active ? undefined : "_blank"} rel={version.active ? undefined : "noreferrer"} title={version.active ? "فتح الملف المحلي المرتبط في Excel" : "فتح ملف هذا الإصدار"}>{version.active ? linkedWorkbook?.name || LOCAL_WORKBOOK_NAME : version.filename}</a><small>{new Date(version.createdAt).toLocaleString("ar-SA")} · {version.rowCount} سجل · {(version.sizeBytes / 1024).toFixed(0)} KB</small><em>{version.stageNames.join(" · ")}</em></div></div>
+                <div className="version-main"><span className="file-badge">XLSX</span><div><a href={version.active ? LOCAL_WORKBOOK_URL : `/api/versions/${version.id}/file`} target={version.active ? undefined : "_blank"} rel={version.active ? undefined : "noreferrer"} title={version.active ? "فتح الملف المحلي المرتبط في Excel" : "فتح ملف هذا الإصدار"}>{version.active ? linkedWorkbook?.name || LOCAL_WORKBOOK_NAME : version.filename}</a><small>{new Date(version.createdAt).toLocaleString("ar-SA")} · {version.rowCount} نقطة تحقق · {(version.sizeBytes / 1024).toFixed(0)} KB</small><em>{version.stageNames.join(" · ")}</em></div></div>
                 <div className="version-actions">
                   {version.active ? <b>الإصدار الحالي</b> : <button disabled={busy} onClick={() => mutate(`/api/versions/${version.id}/activate`, "POST")}>استرجاع وتفعيل</button>}
                   {!version.active && <button className="danger" disabled={busy} onClick={() => mutate(`/api/versions/${version.id}`, "DELETE")}>حذف</button>}

@@ -4,7 +4,7 @@ import path from "node:path";
 import { parseWorkbook } from "../app/workbook-data.ts";
 
 const projectDir = path.resolve(import.meta.dirname, "..");
-const workbookPath = path.join(projectDir, "operating-model-maturity.xlsx");
+const workbookPath = path.join(projectDir, "Copy of قياس_نضج_النموذج_التشغيلي_بالهيكل (1).xlsx");
 const localBaseUrl = process.env.MNGDP_LOCAL_SYNC_URL || "http://localhost:3000";
 const remoteBaseUrl = process.env.MNGDP_SYNC_REMOTE_URL;
 const remoteToken = process.env.MNGDP_SYNC_REMOTE_TOKEN;
