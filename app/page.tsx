@@ -63,13 +63,12 @@ function sortedUnique(values: string[]) {
 }
 
 function scoreText(value: number | null) {
-  return value === null ? "—" : value.toFixed(1);
+  return value === null ? "—" : String(Math.round(value));
 }
 
 function OrgNode({
   label,
   subtitle,
-  score,
   selected,
   root = false,
   leaf = false,
@@ -77,7 +76,6 @@ function OrgNode({
 }: {
   label: string;
   subtitle: string;
-  score: number | null;
   selected: boolean;
   root?: boolean;
   leaf?: boolean;
@@ -91,7 +89,6 @@ function OrgNode({
       aria-pressed={selected}
     >
       <span className="org-node-copy"><small>{subtitle}</small><strong>{label}</strong></span>
-      <b>{scoreText(score)}<i>%</i></b>
     </button>
   );
 }
@@ -184,11 +181,6 @@ export default function Home() {
       .map((score) => score.value);
     return [stage, average(values)];
   })) as Record<string, number | null>, [activeUnitCodeSet, data.scores, data.stages]);
-
-  const overallScore = (unitCodes: string[]) => {
-    const codeSet = new Set(unitCodes);
-    return average(data.scores.filter((score) => codeSet.has(score.unitCode)).map((score) => score.value));
-  };
 
   const mainBranches = useMemo(() => sortedUnique(groupUnits.map((unit) => unit.mainUnit)).map((mainUnit) => {
     const units = groupUnits.filter((unit) => unit.mainUnit === mainUnit);
@@ -287,7 +279,7 @@ export default function Home() {
         <div className="org-chart-scroll">
           <div className="org-chart">
             <div className="org-root-wrap">
-              <OrgNode label={activeGroup} subtitle="المجموعة" score={overallScore(groupRoot.unitCodes)} selected={activeNode.id === groupRoot.id} root onClick={() => setSelected(null)} />
+              <OrgNode label={activeGroup} subtitle="المجموعة" selected={activeNode.id === groupRoot.id} root onClick={() => setSelected(null)} />
             </div>
             <div className="org-trunk" aria-hidden="true" />
             {activeGroup === "الجهاز العسكري" ? (
@@ -303,7 +295,6 @@ export default function Home() {
                           <OrgNode
                             label={branch.mainUnit}
                             subtitle={branch.direct?.level || "وحدة عسكرية"}
-                            score={overallScore(branch.units.map((unit) => unit.code))}
                             selected={activeNode.id === mainId}
                             onClick={() => selectMain(branch.mainUnit, branch.units)}
                           />
@@ -324,7 +315,6 @@ export default function Home() {
                       <OrgNode
                         label={branch.mainUnit}
                         subtitle={branch.children.length ? `${branch.children.length} وحدات فرعية` : branch.direct?.level || "وحدة رئيسية"}
-                        score={overallScore(branch.units.map((unit) => unit.code))}
                         selected={activeNode.id === mainId}
                         onClick={() => selectMain(branch.mainUnit, branch.units)}
                       />
@@ -335,8 +325,7 @@ export default function Home() {
                               key={unit.code}
                               label={unit.measuredUnit}
                               subtitle={unit.level || "وحدة فرعية"}
-                              score={overallScore([unit.code])}
-                              selected={activeNode.id === `unit:${unit.code}`}
+                            selected={activeNode.id === `unit:${unit.code}`}
                               leaf
                               onClick={() => selectUnit(unit)}
                             />
