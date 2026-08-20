@@ -291,13 +291,15 @@ export default function Home() {
             </div>
             <div className="org-trunk" aria-hidden="true" />
             {activeGroup === "الجهاز العسكري" ? (
-              <div className="military-tree">
-                {Array.from({ length: Math.ceil(mainBranches.length / 2) }, (_, rowIndex) => (
-                  <div className="military-level" key={`military-level-${rowIndex}`}>
-                    {mainBranches.slice(rowIndex * 2, rowIndex * 2 + 2).map((branch, branchIndex) => {
+              <div className="military-tiers">
+                {Array.from({ length: Math.ceil(mainBranches.length / 5) }, (_, rowIndex) => {
+                  const tierBranches = mainBranches.slice(rowIndex * 5, rowIndex * 5 + 5);
+                  return (
+                  <div className={`military-tier ${tierBranches.length === 1 ? "single" : ""}`} style={{ "--tier-count": tierBranches.length } as React.CSSProperties} key={`military-tier-${rowIndex}`}>
+                    {tierBranches.map((branch) => {
                       const mainId = `main:${activeGroup}:${branch.mainUnit}`;
                       return (
-                        <div className={`military-arm ${branchIndex === 0 ? "right" : "left"}`} key={branch.mainUnit}>
+                        <div className="military-branch" key={branch.mainUnit}>
                           <OrgNode
                             label={branch.mainUnit}
                             subtitle={branch.direct?.level || "وحدة عسكرية"}
@@ -309,7 +311,8 @@ export default function Home() {
                       );
                     })}
                   </div>
-                ))}
+                  );
+                })}
               </div>
             ) : (
               <div className="org-branches">
