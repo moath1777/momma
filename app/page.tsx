@@ -68,14 +68,12 @@ function scoreText(value: number | null) {
 
 function OrgNode({
   label,
-  subtitle,
   selected,
   root = false,
   leaf = false,
   onClick,
 }: {
   label: string;
-  subtitle: string;
   selected: boolean;
   root?: boolean;
   leaf?: boolean;
@@ -88,7 +86,7 @@ function OrgNode({
       onClick={onClick}
       aria-pressed={selected}
     >
-      <span className="org-node-copy"><small>{subtitle}</small><strong>{label}</strong></span>
+      <span className="org-node-copy"><strong>{label}</strong></span>
     </button>
   );
 }
@@ -279,7 +277,7 @@ export default function Home() {
         <div className="org-chart-scroll">
           <div className="org-chart">
             <div className="org-root-wrap">
-              <OrgNode label={activeGroup} subtitle="المجموعة" selected={activeNode.id === groupRoot.id} root onClick={() => setSelected(null)} />
+              <OrgNode label={activeGroup} selected={activeNode.id === groupRoot.id} root onClick={() => setSelected(null)} />
             </div>
             <div className="org-trunk" aria-hidden="true" />
             {activeGroup === "الجهاز العسكري" ? (
@@ -294,7 +292,6 @@ export default function Home() {
                         <div className="military-branch" key={branch.mainUnit}>
                           <OrgNode
                             label={branch.mainUnit}
-                            subtitle={branch.direct?.level || "وحدة عسكرية"}
                             selected={activeNode.id === mainId}
                             onClick={() => selectMain(branch.mainUnit, branch.units)}
                           />
@@ -314,7 +311,6 @@ export default function Home() {
                       <div className="org-branch-line" aria-hidden="true" />
                       <OrgNode
                         label={branch.mainUnit}
-                        subtitle={branch.children.length ? `${branch.children.length} وحدات فرعية` : branch.direct?.level || "وحدة رئيسية"}
                         selected={activeNode.id === mainId}
                         onClick={() => selectMain(branch.mainUnit, branch.units)}
                       />
@@ -324,8 +320,7 @@ export default function Home() {
                             <OrgNode
                               key={unit.code}
                               label={unit.measuredUnit}
-                              subtitle={unit.level || "وحدة فرعية"}
-                            selected={activeNode.id === `unit:${unit.code}`}
+                              selected={activeNode.id === `unit:${unit.code}`}
                               leaf
                               onClick={() => selectUnit(unit)}
                             />
