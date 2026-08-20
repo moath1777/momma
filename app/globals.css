@@ -401,7 +401,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .maturity-stage-foot { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .maturity-stage-foot > span { color: var(--stage-accent); font-size: 8px; font-weight: 900; }
 .maturity-dots { display: flex; gap: 3px; padding: 3px; border-radius: 99px; background: #f0f4f2; }
-.maturity-dots i { padding: 4px 6px; border-radius: 99px; color: #98a29e; font-size: 7px; font-style: normal; font-weight: 900; opacity: .48; }
+.maturity-dots i { padding: 5px 8px; border-radius: 99px; color: #98a29e; font-size: 9px; font-style: normal; font-weight: 900; opacity: .48; }
 .maturity-dots i.active { color: var(--stage-accent); background: #fff; opacity: 1; box-shadow: 0 2px 8px rgba(23,52,41,.08); }
 
 .organization-panel {
