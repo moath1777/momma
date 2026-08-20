@@ -290,38 +290,61 @@ export default function Home() {
               <OrgNode label={activeGroup} subtitle="المجموعة" score={overallScore(groupRoot.unitCodes)} selected={activeNode.id === groupRoot.id} root onClick={() => setSelected(null)} />
             </div>
             <div className="org-trunk" aria-hidden="true" />
-            <div className="org-branches">
-              {mainBranches.map((branch) => {
-                const mainId = `main:${activeGroup}:${branch.mainUnit}`;
-                return (
-                  <div className="org-branch" key={branch.mainUnit}>
-                    <div className="org-branch-line" aria-hidden="true" />
-                    <OrgNode
-                      label={branch.mainUnit}
-                      subtitle={branch.children.length ? `${branch.children.length} وحدات فرعية` : branch.direct?.level || "وحدة رئيسية"}
-                      score={overallScore(branch.units.map((unit) => unit.code))}
-                      selected={activeNode.id === mainId}
-                      onClick={() => selectMain(branch.mainUnit, branch.units)}
-                    />
-                    {branch.children.length > 0 && (
-                      <div className="org-children">
-                        {branch.children.map((unit) => (
+            {activeGroup === "الجهاز العسكري" ? (
+              <div className="military-tree">
+                {Array.from({ length: Math.ceil(mainBranches.length / 2) }, (_, rowIndex) => (
+                  <div className="military-level" key={`military-level-${rowIndex}`}>
+                    {mainBranches.slice(rowIndex * 2, rowIndex * 2 + 2).map((branch, branchIndex) => {
+                      const mainId = `main:${activeGroup}:${branch.mainUnit}`;
+                      return (
+                        <div className={`military-arm ${branchIndex === 0 ? "right" : "left"}`} key={branch.mainUnit}>
                           <OrgNode
-                            key={unit.code}
-                            label={unit.measuredUnit}
-                            subtitle={unit.level || "وحدة فرعية"}
-                            score={overallScore([unit.code])}
-                            selected={activeNode.id === `unit:${unit.code}`}
-                            leaf
-                            onClick={() => selectUnit(unit)}
+                            label={branch.mainUnit}
+                            subtitle={branch.direct?.level || "وحدة عسكرية"}
+                            score={overallScore(branch.units.map((unit) => unit.code))}
+                            selected={activeNode.id === mainId}
+                            onClick={() => selectMain(branch.mainUnit, branch.units)}
                           />
-                        ))}
-                      </div>
-                    )}
+                        </div>
+                      );
+                    })}
                   </div>
-                );
-              })}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <div className="org-branches">
+                {mainBranches.map((branch) => {
+                  const mainId = `main:${activeGroup}:${branch.mainUnit}`;
+                  return (
+                    <div className="org-branch" key={branch.mainUnit}>
+                      <div className="org-branch-line" aria-hidden="true" />
+                      <OrgNode
+                        label={branch.mainUnit}
+                        subtitle={branch.children.length ? `${branch.children.length} وحدات فرعية` : branch.direct?.level || "وحدة رئيسية"}
+                        score={overallScore(branch.units.map((unit) => unit.code))}
+                        selected={activeNode.id === mainId}
+                        onClick={() => selectMain(branch.mainUnit, branch.units)}
+                      />
+                      {branch.children.length > 0 && (
+                        <div className="org-children">
+                          {branch.children.map((unit) => (
+                            <OrgNode
+                              key={unit.code}
+                              label={unit.measuredUnit}
+                              subtitle={unit.level || "وحدة فرعية"}
+                              score={overallScore([unit.code])}
+                              selected={activeNode.id === `unit:${unit.code}`}
+                              leaf
+                              onClick={() => selectUnit(unit)}
+                            />
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
       </section>
