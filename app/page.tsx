@@ -187,6 +187,24 @@ export default function Home() {
     return { mainUnit, units, children, direct };
   }), [groupUnits]);
 
+  const militaryColumns = useMemo(() => {
+    const orderedBranches = [...mainBranches].sort((a, b) =>
+      (a.units[0]?.code || "").localeCompare(b.units[0]?.code || ""),
+    );
+    const sizes = [6, 5, 6, 4];
+    let offset = 0;
+    return sizes.map((size, index) => {
+      const branches = orderedBranches.slice(offset, offset + size);
+      offset += size;
+      return { id: `military-column-${index + 1}`, tone: ["green", "olive", "olive", "gray"][index], branches };
+    });
+  }, [mainBranches]);
+
+  const militarySections = useMemo(() => [
+    { label: "القيادة والعمليات", columns: militaryColumns.slice(0, 2) },
+    { label: "الإسناد والخدمات", columns: militaryColumns.slice(2, 4) },
+  ], [militaryColumns]);
+
   const modalRows = useMemo(() => {
     if (!openStage) return [];
     return data.rows
@@ -281,24 +299,38 @@ export default function Home() {
             </div>
             <div className="org-trunk" aria-hidden="true" />
             {activeGroup === "الجهاز العسكري" ? (
-              <div className="military-tiers">
-                {Array.from({ length: Math.ceil(mainBranches.length / 5) }, (_, rowIndex) => {
-                  const tierBranches = mainBranches.slice(rowIndex * 5, rowIndex * 5 + 5);
+              <div className="military-command-map">
+                {militarySections.map((section) => {
+                  const sectionUnits = section.columns.flatMap((column) => column.branches.flatMap((branch) => branch.units));
+                  const sectionId = `main:${activeGroup}:${section.label}`;
                   return (
-                  <div className={`military-tier ${tierBranches.length === 1 ? "single" : ""}`} style={{ "--tier-count": tierBranches.length } as React.CSSProperties} key={`military-tier-${rowIndex}`}>
-                    {tierBranches.map((branch) => {
-                      const mainId = `main:${activeGroup}:${branch.mainUnit}`;
-                      return (
-                        <div className="military-branch" key={branch.mainUnit}>
-                          <OrgNode
-                            label={branch.mainUnit}
-                            selected={activeNode.id === mainId}
-                            onClick={() => selectMain(branch.mainUnit, branch.units)}
-                          />
-                        </div>
-                      );
-                    })}
-                  </div>
+                    <section className="military-command-section" key={section.label}>
+                      <div className="military-command">
+                        <OrgNode
+                          label={section.label}
+                          selected={activeNode.id === sectionId}
+                          onClick={() => selectMain(section.label, sectionUnits)}
+                        />
+                      </div>
+                      <div className="military-section-columns">
+                        {section.columns.map((column) => (
+                          <div className={`military-column tone-${column.tone}`} key={column.id}>
+                            {column.branches.map((branch) => {
+                              const mainId = `main:${activeGroup}:${branch.mainUnit}`;
+                              return (
+                                <div className="military-unit" key={branch.mainUnit}>
+                                  <OrgNode
+                                    label={branch.mainUnit}
+                                    selected={activeNode.id === mainId}
+                                    onClick={() => selectMain(branch.mainUnit, branch.units)}
+                                  />
+                                </div>
+                              );
+                            })}
+                          </div>
+                        ))}
+                      </div>
+                    </section>
                   );
                 })}
               </div>
