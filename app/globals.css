@@ -441,10 +441,10 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .org-node-copy strong { overflow: hidden; font-size: 12px; line-height: 1.6; text-overflow: ellipsis; }
 .org-children { position: relative; display: grid; gap: 10px; padding-top: 17px; padding-right: 20px; }
 .org-branch:has(.org-children) > .org-node::after { content: ""; position: absolute; right: 50%; bottom: -18px; width: 1px; height: 18px; background: #c4d4cc; }
-.org-children::before { content: ""; position: absolute; top: -18px; right: 0; left: 50%; height: 1px; background: #c4d4cc; }
+.org-children::before { content: ""; position: absolute; top: 0; right: 0; left: 50%; height: 1px; background: #c4d4cc; }
 .org-children .org-node { position: relative; min-height: 62px; background: #fff; }
 .org-children .org-node::before { content: ""; position: absolute; right: -19px; top: 50%; width: 18px; height: 1px; background: #c4d4cc; }
-.org-children::after { content: ""; position: absolute; right: 0; top: -18px; bottom: 28px; width: 1px; background: #c4d4cc; }
+.org-children::after { content: ""; position: absolute; right: 0; top: 0; bottom: 28px; width: 1px; background: #c4d4cc; }
 
 /* The military group keeps the familiar top-down organization chart, split
    across compact connected tiers so it never becomes one extra-wide row. */
