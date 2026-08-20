@@ -436,9 +436,9 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .org-node.root { width: 300px; min-height: 82px; color: white; border-color: var(--green-dark); background: linear-gradient(135deg, var(--green), var(--green-dark)); box-shadow: 0 14px 32px rgba(31,110,67,.24); }
 .org-node.root.selected { box-shadow: 0 0 0 4px rgba(31,110,67,.16), 0 12px 30px rgba(31,110,67,.27); }
 .org-node-copy { min-width: 0; display: grid; justify-items: center; gap: 4px; }
-.org-node-copy small { color: var(--muted); font-size: 7px; }
+.org-node-copy small { color: var(--muted); font-size: 8px; }
 .org-node.root .org-node-copy small { color: rgba(255,255,255,.7); }
-.org-node-copy strong { overflow: hidden; font-size: 11px; line-height: 1.6; text-overflow: ellipsis; }
+.org-node-copy strong { overflow: hidden; font-size: 12px; line-height: 1.6; text-overflow: ellipsis; }
 .org-children { position: relative; display: grid; gap: 10px; padding-top: 17px; padding-right: 20px; }
 .org-children::before { content: ""; position: absolute; top: -16px; right: 50%; width: 1px; height: 30px; background: #c4d4cc; }
 .org-children .org-node { position: relative; min-height: 62px; background: #fff; }
@@ -528,7 +528,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
   .military-tier { gap: 7px; padding-top: 20px; }
   .military-branch::before { top: -20px; height: 20px; }
   .military-branch .org-node { min-height: 72px; padding: 8px 6px; }
-  .military-organization .org-node-copy strong { font-size: 9px; }
+  .military-organization .org-node-copy strong { font-size: 10px; }
   .checkpoint-backdrop { padding: 8px; }
   .checkpoint-modal { width: 100%; max-height: 94dvh; border-radius: 17px; }
   .checkpoint-head { padding: 14px; }
