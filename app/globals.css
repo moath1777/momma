@@ -481,8 +481,8 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .checkpoint-head h2 { margin: 0 0 4px; font-size: clamp(18px, 2vw, 26px); }
 .checkpoint-head span { color: var(--muted); font-size: 9px; }
 .checkpoint-head button { flex: 0 0 auto; width: 36px; height: 36px; border: 0; border-radius: 11px; color: var(--checkpoint-accent); background: color-mix(in srgb, var(--checkpoint-accent) 10%, white); font-size: 24px; cursor: pointer; }
-.checkpoint-content { overflow: auto; display: grid; gap: 13px; padding: 15px; scrollbar-width: thin; }
-.checkpoint-group { overflow: hidden; border: 1px solid #dfe8e3; border-radius: 15px; background: #fff; }
+.checkpoint-content { overflow: auto; display: flex; flex-direction: column; gap: 13px; padding: 15px; scrollbar-width: thin; }
+.checkpoint-group { flex: 0 0 auto; overflow: hidden; border: 1px solid #dfe8e3; border-radius: 15px; background: #fff; }
 .checkpoint-group-title { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 14px; border-bottom: 1px solid #e9efec; background: color-mix(in srgb, var(--checkpoint-accent) 5%, white); }
 .checkpoint-group-title h3 { margin: 0; color: var(--checkpoint-accent); font-size: 12px; }
 .checkpoint-group-title span { padding: 4px 7px; border-radius: 99px; color: var(--muted); background: #fff; font-size: 7px; }
@@ -491,7 +491,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .checkpoint-row:last-child { border-bottom: 0; }
 .checkpoint-code, .checkpoint-copy, .checkpoint-value { min-width: 0; display: grid; gap: 4px; }
 .checkpoint-code b { color: var(--checkpoint-accent); font-size: 8px; direction: ltr; text-align: right; }
-.checkpoint-code span, .checkpoint-copy small { overflow: hidden; color: var(--muted); font-size: 8px; text-overflow: ellipsis; white-space: nowrap; }
+.checkpoint-code span, .checkpoint-copy small { overflow: visible; color: var(--muted); font-size: 8px; line-height: 1.6; text-overflow: clip; white-space: normal; }
 .checkpoint-copy strong { font-size: 10px; line-height: 1.6; }
 .checkpoint-copy p { margin: 0; color: #77520d; font-size: 8px; line-height: 1.5; }
 .checkpoint-value { justify-items: end; }
