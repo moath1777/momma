@@ -430,12 +430,12 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .org-branches::before { content: ""; position: absolute; top: 0; right: 120px; left: 120px; height: 1px; background: #9fb9ac; }
 .org-branch { position: relative; width: 240px; display: grid; justify-items: stretch; gap: 18px; }
 .org-branch-line { position: absolute; top: -32px; right: 50%; width: 1px; height: 32px; background: #9fb9ac; }
-.org-node { min-width: 0; min-height: 72px; display: grid; align-items: center; padding: 13px 14px; border: 1px solid #d5e2db; border-radius: 15px; color: var(--ink); background: #fbfdfc; text-align: right; cursor: pointer; box-shadow: 0 9px 24px rgba(23,52,41,.055); transition: transform .16s ease, border-color .16s ease, box-shadow .16s ease, background .16s ease; }
+.org-node { min-width: 0; min-height: 72px; display: grid; align-items: center; justify-items: center; padding: 13px 14px; border: 1px solid #d5e2db; border-radius: 15px; color: var(--ink); background: #fbfdfc; text-align: center; cursor: pointer; box-shadow: 0 9px 24px rgba(23,52,41,.055); transition: transform .16s ease, border-color .16s ease, box-shadow .16s ease, background .16s ease; }
 .org-node:hover { transform: translateY(-2px); border-color: #9abca9; background: #f5faf7; }
 .org-node.selected { border-color: var(--green); background: linear-gradient(135deg, #f3faf6, #e7f3ec); box-shadow: 0 0 0 3px rgba(31,110,67,.09), 0 10px 24px rgba(31,110,67,.11); }
 .org-node.root { width: 300px; min-height: 82px; color: white; border-color: var(--green-dark); background: linear-gradient(135deg, var(--green), var(--green-dark)); box-shadow: 0 14px 32px rgba(31,110,67,.24); }
 .org-node.root.selected { box-shadow: 0 0 0 4px rgba(31,110,67,.16), 0 12px 30px rgba(31,110,67,.27); }
-.org-node-copy { min-width: 0; display: grid; gap: 4px; }
+.org-node-copy { min-width: 0; display: grid; justify-items: center; gap: 4px; }
 .org-node-copy small { color: var(--muted); font-size: 7px; }
 .org-node.root .org-node-copy small { color: rgba(255,255,255,.7); }
 .org-node-copy strong { overflow: hidden; font-size: 11px; line-height: 1.6; text-overflow: ellipsis; }
