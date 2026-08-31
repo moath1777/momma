@@ -29,6 +29,7 @@ test("server-renders the organizational maturity dashboard", async () => {
   assert.match(html, /التصميم/);
   assert.match(html, /البناء المؤسسي/);
   assert.match(html, /التشغيل/);
+  assert.match(html, /مستهدف 2026/);
   assert.doesNotMatch(html, /التفعيل/);
 });
 
@@ -43,6 +44,8 @@ test("embedded workbook data matches the new Excel structure", async () => {
   assert.deepEqual(data.stages, ["التصميم", "البناء المؤسسي", "التشغيل"]);
   assert.ok(data.rows.every((row) => row.checkpointCode && row.checkpointText));
   assert.ok(data.rows.every((row) => row.verification >= 0 && row.verification <= 100));
+  assert.ok(data.rows.every((row) => row.target2026 >= 0 && row.target2026 <= 100));
+  assert.ok(data.scores.every((score) => score.target2026 >= 0 && score.target2026 <= 100));
 });
 
 test("upload page explains the required workbook sheets", async () => {
@@ -53,4 +56,5 @@ test("upload page explains the required workbook sheets", async () => {
   assert.match(html, /قائمة الوحدات/);
   assert.match(html, /نقاط التحقق/);
   assert.match(html, /ملخص الوحدات/);
+  assert.match(html, /درجة المرحلة المستهدفة لعام 2026/);
 });

@@ -34,9 +34,15 @@ function normalizeData(payload: Partial<DataPayload>): DataPayload | null {
   if (!Array.isArray(payload.stages) || payload.stages.length !== 3) return null;
   if (!Array.isArray(payload.groups) || payload.groups.length !== 3) return null;
   return {
-    rows: payload.rows,
+    rows: payload.rows.map((row) => ({
+      ...row,
+      target2026: Number.isFinite(Number(row.target2026)) ? Number(row.target2026) : row.verification,
+    })),
     units: payload.units,
-    scores: payload.scores,
+    scores: payload.scores.map((score) => ({
+      ...score,
+      target2026: Number.isFinite(Number(score.target2026)) ? Number(score.target2026) : score.value,
+    })),
     stages: payload.stages,
     groups: payload.groups,
     thresholds: payload.thresholds ?? defaultData.thresholds,
@@ -277,6 +283,14 @@ export default function Home() {
     return [stage, average(values)];
   })) as Record<string, number | null>, [activeUnitCodeSet, data.scores, data.stages]);
 
+  const stageTargets = useMemo(() => Object.fromEntries(data.stages.map((stage) => {
+    const values = data.scores
+      .filter((score) => activeUnitCodeSet.has(score.unitCode) && score.stage === stage)
+      .map((score) => score.target2026)
+      .filter((value) => Number.isFinite(value));
+    return [stage, average(values)];
+  })) as Record<string, number | null>, [activeUnitCodeSet, data.scores, data.stages]);
+
   const mainBranches = useMemo(() => sortedUnique(groupUnits.map((unit) => unit.mainUnit)).map((mainUnit) => {
     const units = groupUnits.filter((unit) => unit.mainUnit === mainUnit);
     const children = units.filter((unit) => unit.measuredUnit !== mainUnit && !isDash(unit.subUnit));
@@ -366,6 +380,8 @@ export default function Home() {
       <section className="maturity-stages" aria-label={`درجات النضج لـ ${activeNode.label}`}>
         {data.stages.map((stage, index) => {
           const value = stageMetrics[stage] ?? null;
+          const target = stageTargets[stage] ?? null;
+          const gap = value === null || target === null ? null : target - value;
           const maturity = maturityLabel(value, data.thresholds);
           return (
             <button
@@ -376,7 +392,18 @@ export default function Home() {
               onClick={() => { if (canShowCheckpoints) setOpenStage(stage); }}
             >
               <i className={styles.stageUpdatePulse} aria-hidden="true" key={`${stage}-${selectionMotion}`} />
-              <div className="maturity-stage-heading"><span>{String(index + 1).padStart(2, "0")}</span><div><small>مرحلة القياس</small><h2>{stage}</h2></div></div>
+              <div className="maturity-stage-heading">
+                <span>{String(index + 1).padStart(2, "0")}</span>
+                <div>
+                  <small>مرحلة القياس</small>
+                  <h2>{stage}</h2>
+                  <div className="maturity-stage-target" aria-label={`مستهدف عام 2026 لمرحلة ${stage}: ${target === null ? "لا توجد بيانات" : `${target.toFixed(1)} بالمئة`}`}>
+                    <span>مستهدف 2026</span>
+                    <strong>{target === null ? "—" : `${target.toFixed(1)}%`}</strong>
+                    {gap !== null && <em>{gap > 0.05 ? `فجوة ${gap.toFixed(1)} نقطة` : gap < -0.05 ? `متجاوز بـ ${Math.abs(gap).toFixed(1)} نقطة` : "تم تحقيق المستهدف"}</em>}
+                  </div>
+                </div>
+              </div>
               <AnimatedStageScore value={value} stage={stage} updateSequence={selectionMotion} />
               <div className="maturity-stage-foot">
                 <div className="maturity-dots" aria-label={`مستوى النضج: ${maturity}`}>
@@ -485,7 +512,11 @@ export default function Home() {
                           <article className="checkpoint-row" key={row.id}>
                             <div className="checkpoint-code"><b>{row.checkpointCode}</b><span>{unit?.measuredUnit || row.subUnit}</span></div>
                             <div className="checkpoint-copy"><strong>{row.checkpointText}</strong>{row.notes && <p>{row.notes}</p>}{row.provider && <small>الجهة المزودة: {row.provider}</small>}</div>
-                            <div className="checkpoint-value"><b>{row.verification.toFixed(0)}%</b><span>{row.status || maturityLabel(row.verification, data.thresholds)}</span></div>
+                            <div className="checkpoint-value">
+                              <div><small>الحالي</small><b>{row.verification.toFixed(0)}%</b></div>
+                              <div className="checkpoint-target"><small>مستهدف 2026</small><b>{row.target2026.toFixed(0)}%</b></div>
+                              <span>{row.status || maturityLabel(row.verification, data.thresholds)}</span>
+                            </div>
                           </article>
                         );
                       })}

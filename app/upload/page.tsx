@@ -129,9 +129,9 @@ export default function UploadPage() {
               <li>الصيغة المطلوبة: <b>XLSX</b>، والحجم لا يتجاوز 15 MB.</li>
               <li>الشيتات المطلوبة بالأسماء نفسها: <b>{REQUIRED_SHEETS.join("، ")}</b>.</li>
               <li>يجب أن تحتوي «قائمة الوحدات» على كود فريد لكل وحدة، ومجموعتها، ووحدتها الرئيسية والفرعية والوحدة المقاسة.</li>
-              <li>أوراق الإدخال الثلاث — <b>{GROUP_SHEETS.join("، ")}</b> — يجب أن تحتفظ بأعمدة الوحدة والمرحلة والعنصر وكود ونص نقطة التحقق ونسبة الإنجاز.</li>
-              <li>شيت «النتائج» يجب أن يحتوي على 3 مراحل بالضبط ودرجة من 0 إلى 100 لكل وحدة في كل مرحلة.</li>
-              <li>نسبة إنجاز نقطة التحقق يجب أن تكون رقمًا بين 0 و100، ويرتبط كل سجل بكود وحدة موجود في «قائمة الوحدات».</li>
+              <li>أوراق الإدخال الثلاث — <b>{GROUP_SHEETS.join("، ")}</b> — يجب أن تحتفظ بأعمدة الوحدة والمرحلة والعنصر وكود ونص نقطة التحقق ونسبتي الإنجاز الحالية والمستهدفة لعام 2026.</li>
+              <li>شيت «النتائج» يجب أن يحتوي على 3 مراحل بالضبط، و«درجة المرحلة» و«درجة المرحلة المستهدفة لعام 2026» لكل وحدة.</li>
+              <li>نسب الإنجاز الحالية والمستهدفة يجب أن تكون أرقامًا بين 0 و100، ويرتبط كل سجل بكود وحدة موجود في «قائمة الوحدات».</li>
               <li>يمكن اختلاف ترتيب الأعمدة، لكن يجب الحفاظ على أسماء الأعمدة المطلوبة كما هي.</li>
             </ul>
             <p>للتحديث التلقائي: اضغط «ربط الملف» مرة واحدة واختر ملف Excel الحالي. ما دام الموقع مفتوحًا على لوحة التحليل أو صفحة رفع البيانات، يلتقط الحفظ الجديد ويحدّث اللوحة تلقائيًا. الملف الافتراضي داخل المشروع هو <b>{LOCAL_WORKBOOK_NAME}</b>.</p>
@@ -143,7 +143,7 @@ export default function UploadPage() {
           <div className="versions-list">
             {versions.map((version) => (
               <article className={`version-card ${version.active ? "current" : ""}`} key={version.id}>
-                <div className="version-main"><span className="file-badge">XLSX</span><div><a href={version.active ? LOCAL_WORKBOOK_URL : `/api/versions/${version.id}/file`} target={version.active ? undefined : "_blank"} rel={version.active ? undefined : "noreferrer"} title={version.active ? "فتح الملف المحلي المرتبط في Excel" : "فتح ملف هذا الإصدار"}>{version.active ? linkedWorkbook?.name || LOCAL_WORKBOOK_NAME : version.filename}</a><small>{new Date(version.createdAt).toLocaleString("ar-SA")} · {version.rowCount} نقطة تحقق · {(version.sizeBytes / 1024).toFixed(0)} KB</small><em>{version.stageNames.join(" · ")}</em></div></div>
+                <div className="version-main"><span className="file-badge">XLSX</span><div><a href={version.active ? LOCAL_WORKBOOK_URL : `/api/versions/${version.id}/file`} target={version.active ? undefined : "_blank"} rel={version.active ? undefined : "noreferrer"} title={version.active ? "فتح الملف المحلي المرتبط في Excel" : "فتح ملف هذا الإصدار"}>{version.active ? linkedWorkbook?.name || version.filename || LOCAL_WORKBOOK_NAME : version.filename}</a><small>{new Date(version.createdAt).toLocaleString("ar-SA")} · {version.rowCount} نقطة تحقق · {(version.sizeBytes / 1024).toFixed(0)} KB</small><em>{version.stageNames.join(" · ")}</em></div></div>
                 <div className="version-actions">
                   {version.active ? <b>الإصدار الحالي</b> : <button disabled={busy} onClick={() => mutate(`/api/versions/${version.id}/activate`, "POST")}>استرجاع وتفعيل</button>}
                   {!version.active && <button className="danger" disabled={busy} onClick={() => mutate(`/api/versions/${version.id}`, "DELETE")}>حذف</button>}

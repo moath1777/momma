@@ -4,7 +4,7 @@ import path from "node:path";
 import { parseWorkbook } from "../app/workbook-data.ts";
 
 const projectDir = path.resolve(import.meta.dirname, "..");
-const workbookName = "Copy of قياس_نضج_النموذج_التشغيلي_بالهيكل (1).xlsx";
+const workbookName = "قياس_نضج_النموذج_التشغيلي_بالهيكل (4).xlsx";
 const workbookPath = path.join(projectDir, workbookName);
 const bytes = await readFile(workbookPath);
 const file = new File([bytes], workbookName, {

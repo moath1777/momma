@@ -12,7 +12,7 @@ export const REQUIRED_SHEETS = [
 
 export const REQUIRED_COLUMNS: Record<string, string[]> = {
   "قائمة الوحدات": ["كود الوحدة", "المجموعة", "الوحدة التنظيمية الرئيسية", "الوحدة التنظيمية الفرعية", "الوحدة المقاسة", "مستوى الوحدة"],
-  "النتائج": ["كود الوحدة", "المجموعة", "الوحدة التنظيمية الرئيسية", "الوحدة التنظيمية الفرعية", "المرحلة", "درجة المرحلة", "التصنيف"],
+  "النتائج": ["كود الوحدة", "المجموعة", "الوحدة التنظيمية الرئيسية", "الوحدة التنظيمية الفرعية", "المرحلة", "درجة المرحلة", "درجة المرحلة المستهدفة لعام 2026", "التصنيف"],
   "نقاط التحقق": ["كود النقطة", "المرحلة", "العنصر", "نص نقطة التحقق"],
   ...Object.fromEntries(GROUP_SHEETS.map((sheet) => [sheet, [
     "معرف الصف",
@@ -25,6 +25,7 @@ export const REQUIRED_COLUMNS: Record<string, string[]> = {
     "كود النقطة",
     "نص نقطة التحقق",
     "نسبة إنجاز النقطة %",
+    "نسبة إنجاز النقطة المستهدفة لعام 2026 %",
   ]])),
 };
 
@@ -44,6 +45,7 @@ export type StageScore = {
   subUnit: string;
   stage: string;
   value: number;
+  target2026: number;
   classification: string;
 };
 
@@ -58,6 +60,7 @@ export type WorkbookRow = {
   checkpointCode: string;
   checkpointText: string;
   verification: number;
+  target2026: number;
   status: string;
   notes: string;
   provider: string;
@@ -81,7 +84,7 @@ export type LocalFileHandle = {
   requestPermission?: (options?: { mode?: "read" }) => Promise<PermissionState>;
 };
 
-export const LOCAL_WORKBOOK_NAME = "Copy of قياس_نضج_النموذج_التشغيلي_بالهيكل (1).xlsx";
+export const LOCAL_WORKBOOK_NAME = "قياس_نضج_النموذج_التشغيلي_بالهيكل (4).xlsx";
 export const LOCAL_WORKBOOK_URL = `ms-excel:ofe|u|file:///C:/Users/moath/Documents/momma/${encodeURI(LOCAL_WORKBOOK_NAME)}`;
 export const LOCAL_SYNC_FINGERPRINT_KEY = "maturity-last-synced-fingerprint-v3";
 const LOCAL_SYNC_DB = "maturity-local-sync";
@@ -195,7 +198,9 @@ export function parseWorkbook(file: File): Promise<ParsedData> {
       .filter((row) => text(cell(row, resultsSheet.indexes, "كود الوحدة")))
       .map((row, index) => {
         const value = numberValue(cell(row, resultsSheet.indexes, "درجة المرحلة"), "النتائج", index + 2, "درجة المرحلة");
+        const target2026 = numberValue(cell(row, resultsSheet.indexes, "درجة المرحلة المستهدفة لعام 2026"), "النتائج", index + 2, "درجة المرحلة المستهدفة لعام 2026");
         if (value < 0 || value > 100) throw new Error(`درجة المرحلة خارج النطاق في شيت «النتائج»، الصف ${index + 2}.`);
+        if (target2026 < 0 || target2026 > 100) throw new Error(`مستهدف 2026 خارج النطاق في شيت «النتائج»، الصف ${index + 2}.`);
         return {
           unitCode: text(cell(row, resultsSheet.indexes, "كود الوحدة")),
           group: text(cell(row, resultsSheet.indexes, "المجموعة")),
@@ -203,6 +208,7 @@ export function parseWorkbook(file: File): Promise<ParsedData> {
           subUnit: text(cell(row, resultsSheet.indexes, "الوحدة التنظيمية الفرعية")),
           stage: text(cell(row, resultsSheet.indexes, "المرحلة")),
           value,
+          target2026,
           classification: text(cell(row, resultsSheet.indexes, "التصنيف")),
         };
       });
@@ -217,7 +223,9 @@ export function parseWorkbook(file: File): Promise<ParsedData> {
         .filter((row) => text(cell(row, input.indexes, "معرف الصف")))
         .forEach((row, index) => {
           const verification = numberValue(cell(row, input.indexes, "نسبة إنجاز النقطة %"), sheetName, index + 2, "نسبة إنجاز النقطة %");
+          const target2026 = numberValue(cell(row, input.indexes, "نسبة إنجاز النقطة المستهدفة لعام 2026 %"), sheetName, index + 2, "نسبة إنجاز النقطة المستهدفة لعام 2026 %");
           if (verification < 0 || verification > 100) throw new Error(`نسبة إنجاز النقطة خارج النطاق في شيت «${sheetName}»، الصف ${index + 2}.`);
+          if (target2026 < 0 || target2026 > 100) throw new Error(`مستهدف 2026 خارج النطاق في شيت «${sheetName}»، الصف ${index + 2}.`);
           const unitCode = text(cell(row, input.indexes, "كود الوحدة"));
           if (!unitCodes.has(unitCode)) throw new Error(`كود الوحدة «${unitCode}» في شيت «${sheetName}» غير موجود في «قائمة الوحدات».`);
           rows.push({
@@ -231,6 +239,7 @@ export function parseWorkbook(file: File): Promise<ParsedData> {
             checkpointCode: text(cell(row, input.indexes, "كود النقطة")),
             checkpointText: text(cell(row, input.indexes, "نص نقطة التحقق")),
             verification,
+            target2026,
             status: text(cell(row, input.indexes, "حالة النقطة")),
             notes: text(cell(row, input.indexes, "ملاحظات النقطة")),
             provider: text(cell(row, input.indexes, "الجهة المزودة للمعلومة")),
