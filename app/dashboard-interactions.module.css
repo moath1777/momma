@@ -2,6 +2,16 @@
   isolation: isolate;
 }
 
+.stageCard:disabled {
+  cursor: default;
+}
+
+.stageCard:disabled:hover {
+  border-color: var(--line);
+  box-shadow: 0 12px 34px rgba(23,52,41,.055);
+  transform: none;
+}
+
 .stageUpdatePulse {
   position: absolute;
   inset: -1px;

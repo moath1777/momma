@@ -194,6 +194,7 @@ export default function Home() {
 
   const activeNode = selected?.group === activeGroup ? selected : groupRoot;
   const hasFocusedNode = activeNode.kind !== "group";
+  const canShowCheckpoints = activeNode.kind !== "group";
   const activeUnitCodeSet = useMemo(() => new Set(activeNode.unitCodes), [activeNode.unitCodes]);
 
   useEffect(() => {
@@ -353,7 +354,13 @@ export default function Home() {
           const value = stageMetrics[stage] ?? null;
           const maturity = maturityLabel(value, data.thresholds);
           return (
-            <button className={`maturity-stage ${stageClasses[index]} ${styles.stageCard}`} type="button" key={stage} onClick={() => setOpenStage(stage)}>
+            <button
+              className={`maturity-stage ${stageClasses[index]} ${styles.stageCard}`}
+              type="button"
+              key={stage}
+              disabled={!canShowCheckpoints}
+              onClick={() => { if (canShowCheckpoints) setOpenStage(stage); }}
+            >
               <i className={styles.stageUpdatePulse} aria-hidden="true" key={`${stage}-${selectionMotion}`} />
               <div className="maturity-stage-heading"><span>{String(index + 1).padStart(2, "0")}</span><div><small>مرحلة القياس</small><h2>{stage}</h2></div></div>
               <AnimatedStageScore value={value} stage={stage} updateSequence={selectionMotion} />
@@ -361,7 +368,7 @@ export default function Home() {
                 <div className="maturity-dots" aria-label={`مستوى النضج: ${maturity}`}>
                   {maturityStates.map((state) => <i className={maturity === state ? "active" : ""} key={state}>{state}</i>)}
                 </div>
-                <span>عرض نقاط التحقق ←</span>
+                <span>{canShowCheckpoints ? "عرض نقاط التحقق ←" : "اختر عقدة فرعية لعرض نقاط التحقق"}</span>
               </div>
             </button>
           );
