@@ -368,7 +368,7 @@ export default function Home() {
                 <div className="maturity-dots" aria-label={`مستوى النضج: ${maturity}`}>
                   {maturityStates.map((state) => <i className={maturity === state ? "active" : ""} key={state}>{state}</i>)}
                 </div>
-                <span>{canShowCheckpoints ? "عرض نقاط التحقق ←" : "اختر عقدة فرعية لعرض نقاط التحقق"}</span>
+                <span className={canShowCheckpoints ? styles.checkpointPrompt : ""}>{canShowCheckpoints ? "انقر لعرض نقاط التحقق ←" : "اختر عقدة فرعية لعرض نقاط التحقق"}</span>
               </div>
             </button>
           );

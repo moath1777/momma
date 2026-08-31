@@ -12,6 +12,18 @@
   transform: none;
 }
 
+.checkpointPrompt {
+  display: inline-flex;
+  align-items: center;
+  min-height: 27px;
+  padding: 0 10px;
+  border: 1px solid color-mix(in srgb, var(--stage-accent) 24%, white);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--stage-accent) 9%, white);
+  box-shadow: 0 4px 10px color-mix(in srgb, var(--stage-accent) 10%, transparent);
+  font-size: 9px !important;
+}
+
 .stageUpdatePulse {
   position: absolute;
   inset: -1px;
