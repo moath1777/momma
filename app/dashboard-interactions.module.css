@@ -24,33 +24,34 @@
   font-size: 9px !important;
 }
 
-.nodeStageMetrics {
+.nodeMaturitySignals {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 4px;
   margin-top: 3px;
-  direction: ltr;
 }
 
-.nodeStageMetric {
+.nodeMaturitySignal {
+  --maturity-color: #a3aca8;
   display: inline-flex;
   align-items: center;
   gap: 3px;
-  min-width: 39px;
-  padding: 3px 4px;
-  border: 1px solid currentColor;
-  border-radius: 7px;
-  background: #fff;
-  box-shadow: 0 2px 5px rgba(23,52,41,.05);
+  padding: 3px 6px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  color: var(--maturity-color);
+  background: color-mix(in srgb, var(--maturity-color) 8%, white);
   font-size: 7px;
   font-style: normal;
   font-weight: 900;
   line-height: 1.1;
+  opacity: .32;
+  transition: opacity .2s ease, box-shadow .2s ease, transform .2s ease, background .2s ease;
   white-space: nowrap;
 }
 
-.nodeStageMetric i {
+.nodeMaturitySignal i {
   width: 5px;
   height: 5px;
   flex: 0 0 auto;
@@ -58,11 +59,18 @@
   background: currentColor;
 }
 
-.nodeMetricDesign { color: #148b97; }
-.nodeMetricBuild { color: #d78616; }
-.nodeMetricOperation { color: #1f6e43; }
+.nodeMaturitySignal.nodeMaturityActive {
+  border-color: color-mix(in srgb, var(--maturity-color) 48%, white);
+  opacity: 1;
+  box-shadow: 0 3px 8px color-mix(in srgb, var(--maturity-color) 22%, transparent);
+  transform: translateY(-1px);
+}
 
-.dimmedNode .nodeStageMetric {
+.nodeMaturityInitial { --maturity-color: #c84943; }
+.nodeMaturityPartial { --maturity-color: #d99516; }
+.nodeMaturityAdvanced { --maturity-color: #1f814c; }
+
+.dimmedNode .nodeMaturitySignal {
   box-shadow: none;
 }
 

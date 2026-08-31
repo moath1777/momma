@@ -61,6 +61,7 @@ export type WorkbookRow = {
   status: string;
   notes: string;
   provider: string;
+  weight?: number;
 };
 
 export type ParsedData = {
@@ -145,6 +146,23 @@ function readSheet(workbook: XLSX.WorkBook, name: string) {
   return { rows: matrix.slice(1), indexes };
 }
 
+function weightKey(stage: string, element: string) {
+  return `${stage}\u0000${element}`;
+}
+
+function readReferenceWeights(workbook: XLSX.WorkBook) {
+  const reference = readSheet(workbook, "المرجع");
+  const weightHeader = ["الوزن في المرحلة %", "الوزن في المرحلة", "الوزن"].find((header) => reference.indexes[header] !== undefined);
+  if (!weightHeader || reference.indexes["المرحلة"] === undefined || reference.indexes["العنصر"] === undefined) return new Map<string, number>();
+
+  return new Map(reference.rows.flatMap((row) => {
+    const stage = text(cell(row, reference.indexes, "المرحلة"));
+    const element = text(cell(row, reference.indexes, "العنصر"));
+    const weight = Number(cell(row, reference.indexes, weightHeader));
+    return stage && element && Number.isFinite(weight) && weight > 0 ? [[weightKey(stage, element), weight] as const] : [];
+  }));
+}
+
 function cell(row: Array<string | number | boolean>, indexes: Record<string, number>, header: string) {
   const index = indexes[header];
   return index === undefined ? "" : row[index];
@@ -191,6 +209,7 @@ export function parseWorkbook(file: File): Promise<ParsedData> {
     if (!scores.length) throw new Error("شيت «النتائج» لا يحتوي على نتائج.");
     if (scores.some((score) => !unitCodes.has(score.unitCode))) throw new Error("توجد نتائج مرتبطة بكود وحدة غير موجود في «قائمة الوحدات».");
 
+    const referenceWeights = readReferenceWeights(workbook);
     const rows: WorkbookRow[] = [];
     for (const sheetName of GROUP_SHEETS) {
       const input = readSheet(workbook, sheetName);
@@ -215,6 +234,7 @@ export function parseWorkbook(file: File): Promise<ParsedData> {
             status: text(cell(row, input.indexes, "حالة النقطة")),
             notes: text(cell(row, input.indexes, "ملاحظات النقطة")),
             provider: text(cell(row, input.indexes, "الجهة المزودة للمعلومة")),
+            weight: referenceWeights.get(weightKey(text(cell(row, input.indexes, "المرحلة")), text(cell(row, input.indexes, "العنصر")))),
           });
         });
     }

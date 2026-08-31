@@ -22,7 +22,6 @@ type SelectedNode = {
   group: string;
   unitCodes: string[];
 };
-type NodeStageMetric = { stage: string; value: number | null };
 
 const defaultData = modelData as DataPayload;
 const stageClasses = ["design", "build", "operation"];
@@ -70,7 +69,7 @@ function OrgNode({
   root = false,
   leaf = false,
   dimmed = false,
-  stageMetrics,
+  maturity,
   onClick,
 }: {
   label: string;
@@ -78,7 +77,7 @@ function OrgNode({
   root?: boolean;
   leaf?: boolean;
   dimmed?: boolean;
-  stageMetrics?: NodeStageMetric[];
+  maturity?: ReturnType<typeof maturityLabel>;
   onClick: () => void;
 }) {
   return (
@@ -90,18 +89,11 @@ function OrgNode({
     >
       <span className="org-node-copy">
         <strong>{label}</strong>
-        {!root && stageMetrics?.length ? (
-          <span
-            className={styles.nodeStageMetrics}
-            aria-label={`متوسطات المراحل: ${stageMetrics.map((metric) => `${metric.stage} ${metric.value === null ? "لا توجد بيانات" : `${metric.value.toFixed(1)} بالمئة`}`).join("، ")}`}
-          >
-            {stageMetrics.map((metric, index) => {
-              const metricClass = [styles.nodeMetricDesign, styles.nodeMetricBuild, styles.nodeMetricOperation][index] ?? styles.nodeMetricDesign;
-              return (
-                <span className={`${styles.nodeStageMetric} ${metricClass}`} title={`${metric.stage}: ${metric.value === null ? "لا توجد بيانات" : `${metric.value.toFixed(1)}%`}`} key={metric.stage} aria-hidden="true">
-                  <i />{metric.value === null ? "—" : `${metric.value.toFixed(1)}%`}
-                </span>
-              );
+        {!root && maturity ? (
+          <span className={styles.nodeMaturitySignals} aria-label={`مستوى النضج الكلي: ${maturity}`}>
+            {maturityStates.map((state) => {
+              const signalClass = state === "أولي" ? styles.nodeMaturityInitial : state === "جزئي" ? styles.nodeMaturityPartial : styles.nodeMaturityAdvanced;
+              return <span className={`${styles.nodeMaturitySignal} ${signalClass} ${maturity === state ? styles.nodeMaturityActive : ""}`} key={state}><i />{state}</span>;
             })}
           </span>
         ) : null}
@@ -206,24 +198,20 @@ export default function Home() {
   const hasFocusedNode = activeNode.kind !== "group";
   const canShowCheckpoints = activeNode.kind !== "group";
   const activeUnitCodeSet = useMemo(() => new Set(activeNode.unitCodes), [activeNode.unitCodes]);
-  const scoreByUnitAndStage = useMemo(() => {
-    const lookup = new Map<string, Map<string, number>>();
-    data.scores.forEach((score) => {
-      const byStage = lookup.get(score.unitCode) ?? new Map<string, number>();
-      byStage.set(score.stage, score.value);
-      lookup.set(score.unitCode, byStage);
-    });
-    return lookup;
-  }, [data.scores]);
 
-  function nodeStageMetrics(unitCodes: string[]): NodeStageMetric[] {
-    return data.stages.map((stage) => ({
-      stage,
-      value: average(unitCodes.flatMap((unitCode) => {
-        const value = scoreByUnitAndStage.get(unitCode)?.get(stage);
-        return value === undefined ? [] : [value];
-      })),
-    }));
+  function nodeMaturity(unitCodes: string[]) {
+    const unitCodeSet = new Set(unitCodes);
+    const weightedRows = data.rows
+      .filter((row) => unitCodeSet.has(row.unitCode))
+      .flatMap((row) => {
+        const weight = Number((row as WorkbookRow & { weight?: unknown }).weight);
+        return Number.isFinite(weight) && weight > 0 ? [{ value: row.verification, weight }] : [];
+      });
+
+    const weightedScore = weightedRows.length
+      ? weightedRows.reduce((total, row) => total + row.value * row.weight, 0) / weightedRows.reduce((total, row) => total + row.weight, 0)
+      : average(data.scores.filter((score) => unitCodeSet.has(score.unitCode)).map((score) => score.value));
+    return maturityLabel(weightedScore, data.thresholds);
   }
 
   useEffect(() => {
@@ -433,7 +421,7 @@ export default function Home() {
                             label={branch.mainUnit}
                             selected={activeNode.id === mainId}
                             dimmed={hasFocusedNode && activeNode.id !== mainId}
-                            stageMetrics={nodeStageMetrics(branch.units.map((unit) => unit.code))}
+                            maturity={nodeMaturity(branch.units.map((unit) => unit.code))}
                             onClick={() => selectMain(branch.mainUnit, branch.units)}
                           />
                         </div>
@@ -453,7 +441,7 @@ export default function Home() {
                         label={branch.mainUnit}
                         selected={activeNode.id === mainId}
                         dimmed={hasFocusedNode && activeNode.id !== mainId}
-                        stageMetrics={nodeStageMetrics(branch.units.map((unit) => unit.code))}
+                        maturity={nodeMaturity(branch.units.map((unit) => unit.code))}
                         onClick={() => selectMain(branch.mainUnit, branch.units)}
                       />
                       {branch.children.length > 0 && (
@@ -464,7 +452,7 @@ export default function Home() {
                               label={unit.measuredUnit}
                               selected={activeNode.id === `unit:${unit.code}`}
                               dimmed={hasFocusedNode && activeNode.id !== `unit:${unit.code}`}
-                              stageMetrics={nodeStageMetrics([unit.code])}
+                              maturity={nodeMaturity([unit.code])}
                               leaf
                               onClick={() => selectUnit(unit)}
                             />
