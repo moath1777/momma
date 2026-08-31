@@ -24,6 +24,48 @@
   font-size: 9px !important;
 }
 
+.nodeStageMetrics {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  margin-top: 3px;
+  direction: ltr;
+}
+
+.nodeStageMetric {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  min-width: 39px;
+  padding: 3px 4px;
+  border: 1px solid currentColor;
+  border-radius: 7px;
+  background: #fff;
+  box-shadow: 0 2px 5px rgba(23,52,41,.05);
+  font-size: 7px;
+  font-style: normal;
+  font-weight: 900;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.nodeStageMetric i {
+  width: 5px;
+  height: 5px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.nodeMetricDesign { color: #148b97; }
+.nodeMetricBuild { color: #d78616; }
+.nodeMetricOperation { color: #1f6e43; }
+
+.dimmedNode .nodeStageMetric {
+  box-shadow: none;
+}
+
 .stageUpdatePulse {
   position: absolute;
   inset: -1px;

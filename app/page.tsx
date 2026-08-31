@@ -22,6 +22,7 @@ type SelectedNode = {
   group: string;
   unitCodes: string[];
 };
+type NodeStageMetric = { stage: string; value: number | null };
 
 const defaultData = modelData as DataPayload;
 const stageClasses = ["design", "build", "operation"];
@@ -69,6 +70,7 @@ function OrgNode({
   root = false,
   leaf = false,
   dimmed = false,
+  stageMetrics,
   onClick,
 }: {
   label: string;
@@ -76,6 +78,7 @@ function OrgNode({
   root?: boolean;
   leaf?: boolean;
   dimmed?: boolean;
+  stageMetrics?: NodeStageMetric[];
   onClick: () => void;
 }) {
   return (
@@ -85,7 +88,24 @@ function OrgNode({
       onClick={onClick}
       aria-pressed={selected}
     >
-      <span className="org-node-copy"><strong>{label}</strong></span>
+      <span className="org-node-copy">
+        <strong>{label}</strong>
+        {!root && stageMetrics?.length ? (
+          <span
+            className={styles.nodeStageMetrics}
+            aria-label={`متوسطات المراحل: ${stageMetrics.map((metric) => `${metric.stage} ${metric.value === null ? "لا توجد بيانات" : `${metric.value.toFixed(1)} بالمئة`}`).join("، ")}`}
+          >
+            {stageMetrics.map((metric, index) => {
+              const metricClass = [styles.nodeMetricDesign, styles.nodeMetricBuild, styles.nodeMetricOperation][index] ?? styles.nodeMetricDesign;
+              return (
+                <span className={`${styles.nodeStageMetric} ${metricClass}`} title={`${metric.stage}: ${metric.value === null ? "لا توجد بيانات" : `${metric.value.toFixed(1)}%`}`} key={metric.stage} aria-hidden="true">
+                  <i />{metric.value === null ? "—" : `${metric.value.toFixed(1)}%`}
+                </span>
+              );
+            })}
+          </span>
+        ) : null}
+      </span>
     </button>
   );
 }
@@ -186,6 +206,25 @@ export default function Home() {
   const hasFocusedNode = activeNode.kind !== "group";
   const canShowCheckpoints = activeNode.kind !== "group";
   const activeUnitCodeSet = useMemo(() => new Set(activeNode.unitCodes), [activeNode.unitCodes]);
+  const scoreByUnitAndStage = useMemo(() => {
+    const lookup = new Map<string, Map<string, number>>();
+    data.scores.forEach((score) => {
+      const byStage = lookup.get(score.unitCode) ?? new Map<string, number>();
+      byStage.set(score.stage, score.value);
+      lookup.set(score.unitCode, byStage);
+    });
+    return lookup;
+  }, [data.scores]);
+
+  function nodeStageMetrics(unitCodes: string[]): NodeStageMetric[] {
+    return data.stages.map((stage) => ({
+      stage,
+      value: average(unitCodes.flatMap((unitCode) => {
+        const value = scoreByUnitAndStage.get(unitCode)?.get(stage);
+        return value === undefined ? [] : [value];
+      })),
+    }));
+  }
 
   useEffect(() => {
     const refreshData = () => fetch(`/api/data?refresh=${Date.now()}`, { cache: "no-store" })
@@ -394,6 +433,7 @@ export default function Home() {
                             label={branch.mainUnit}
                             selected={activeNode.id === mainId}
                             dimmed={hasFocusedNode && activeNode.id !== mainId}
+                            stageMetrics={nodeStageMetrics(branch.units.map((unit) => unit.code))}
                             onClick={() => selectMain(branch.mainUnit, branch.units)}
                           />
                         </div>
@@ -413,6 +453,7 @@ export default function Home() {
                         label={branch.mainUnit}
                         selected={activeNode.id === mainId}
                         dimmed={hasFocusedNode && activeNode.id !== mainId}
+                        stageMetrics={nodeStageMetrics(branch.units.map((unit) => unit.code))}
                         onClick={() => selectMain(branch.mainUnit, branch.units)}
                       />
                       {branch.children.length > 0 && (
@@ -423,6 +464,7 @@ export default function Home() {
                               label={unit.measuredUnit}
                               selected={activeNode.id === `unit:${unit.code}`}
                               dimmed={hasFocusedNode && activeNode.id !== `unit:${unit.code}`}
+                              stageMetrics={nodeStageMetrics([unit.code])}
                               leaf
                               onClick={() => selectUnit(unit)}
                             />
