@@ -101,27 +101,19 @@ function AnimatedStageScore({
 }) {
   const initialValue = value ?? 0;
   const [displayValue, setDisplayValue] = useState(initialValue);
-  const [change, setChange] = useState<number | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
   const displayValueRef = useRef(initialValue);
-  const previousTargetRef = useRef<number | null | undefined>(undefined);
 
   useEffect(() => {
-    const previousTarget = previousTargetRef.current;
-    previousTargetRef.current = value;
-
     if (value === null) {
       displayValueRef.current = 0;
       setDisplayValue(0);
-      setChange(null);
       setIsAnimating(false);
       return;
     }
 
     const from = displayValueRef.current;
-    const difference = previousTarget === undefined || previousTarget === null ? 0 : value - previousTarget;
     const hasValueChange = Math.abs(value - from) > 0.02;
-    setChange(Math.abs(difference) >= 0.05 ? difference : null);
 
     if (!hasValueChange) {
       displayValueRef.current = value;
@@ -153,7 +145,6 @@ function AnimatedStageScore({
   }, [value, updateSequence]);
 
   const progress = Math.max(0, Math.min(100, displayValue));
-  const direction = change === null ? "" : change > 0 ? styles.scoreUp : styles.scoreDown;
 
   return (
     <div
@@ -162,7 +153,6 @@ function AnimatedStageScore({
       aria-label={`نسبة ${stage}: ${value === null ? "لا توجد بيانات" : `${value.toFixed(1)} بالمئة`}`}
     >
       <strong>{value === null ? "—" : displayValue.toFixed(1)}</strong><span>%</span>
-      {change !== null && <b className={`${styles.scoreChange} ${direction}`} aria-hidden="true">{change > 0 ? "↑" : "↓"} {Math.abs(change).toFixed(1)}</b>}
       <output className={styles.screenReaderUpdate} aria-live="polite">
         {isAnimating ? `تتغير نسبة مرحلة ${stage}` : `نسبة مرحلة ${stage} ${value === null ? "لا توجد بيانات" : `${value.toFixed(1)} بالمئة`}`}
       </output>
