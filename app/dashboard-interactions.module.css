@@ -1,0 +1,121 @@
+.stageCard {
+  isolation: isolate;
+}
+
+.stageUpdatePulse {
+  position: absolute;
+  inset: -1px;
+  z-index: 2;
+  border: 2px solid var(--stage-accent);
+  border-radius: inherit;
+  opacity: 0;
+  pointer-events: none;
+  animation: stageUpdatePulse 1.05s cubic-bezier(.16, 1, .3, 1);
+}
+
+.animatedScore {
+  position: relative;
+  overflow: visible;
+  transition: box-shadow .28s ease, transform .28s ease;
+}
+
+.scoreAnimating {
+  box-shadow: 0 0 0 8px color-mix(in srgb, var(--stage-accent) 10%, transparent), 0 10px 20px color-mix(in srgb, var(--stage-accent) 18%, transparent);
+  transform: scale(1.055);
+}
+
+.scoreChange {
+  position: absolute;
+  right: 50%;
+  bottom: -19px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  min-width: max-content;
+  padding: 3px 6px;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 5px 12px rgba(23,52,41,.1);
+  font-size: 8px;
+  font-weight: 900;
+  line-height: 1;
+  transform: translateX(50%);
+  animation: scoreChangeIn .35s cubic-bezier(.16, 1, .3, 1);
+}
+
+.scoreUp { color: #157742; }
+.scoreDown { color: #c66e13; }
+
+.screenReaderUpdate {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.nodeSelectionActive :global(.org-node) {
+  transition: opacity .28s ease, filter .28s ease, transform .28s ease, border-color .28s ease, box-shadow .28s ease, background .28s ease;
+}
+
+.dimmedNode {
+  opacity: .34;
+  filter: grayscale(.35) saturate(.38);
+  transform: scale(.975);
+}
+
+.selectedNode {
+  z-index: 3;
+  animation: selectedNodeIn .46s cubic-bezier(.16, 1, .3, 1);
+}
+
+.nodeSelectionActive :global(.org-node).selectedNode::before {
+  content: "محدد الآن";
+  position: absolute;
+  top: -11px;
+  right: 50%;
+  z-index: 4;
+  padding: 3px 8px;
+  border-radius: 999px;
+  color: #fff;
+  background: var(--green);
+  box-shadow: 0 4px 10px rgba(21,101,60,.22);
+  font-size: 8px;
+  font-weight: 900;
+  line-height: 1.1;
+  white-space: nowrap;
+  transform: translateX(50%);
+}
+
+.nodeSelectionActive :global(.org-node.root).selectedNode::before {
+  background: #fff;
+  color: var(--green-dark);
+}
+
+@keyframes stageUpdatePulse {
+  0% { opacity: .74; transform: scale(.985); }
+  100% { opacity: 0; transform: scale(1.035); }
+}
+
+@keyframes scoreChangeIn {
+  from { opacity: 0; transform: translate(50%, 5px) scale(.9); }
+  to { opacity: 1; transform: translate(50%, 0) scale(1); }
+}
+
+@keyframes selectedNodeIn {
+  0% { transform: scale(.94); }
+  65% { transform: scale(1.035); }
+  100% { transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stageUpdatePulse,
+  .selectedNode,
+  .scoreChange { animation: none; }
+  .animatedScore,
+  .nodeSelectionActive :global(.org-node) { transition: none; }
+}

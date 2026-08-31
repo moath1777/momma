@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import modelData from "./model-data.json";
+import styles from "./dashboard-interactions.module.css";
 import {
   LOCAL_SYNC_FINGERPRINT_KEY,
   fileFingerprint,
@@ -62,32 +63,110 @@ function sortedUnique(values: string[]) {
   return [...new Set(values)].sort((a, b) => a.localeCompare(b, "ar"));
 }
 
-function scoreText(value: number | null) {
-  return value === null ? "—" : String(Math.round(value));
-}
-
 function OrgNode({
   label,
   selected,
   root = false,
   leaf = false,
+  dimmed = false,
   onClick,
 }: {
   label: string;
   selected: boolean;
   root?: boolean;
   leaf?: boolean;
+  dimmed?: boolean;
   onClick: () => void;
 }) {
   return (
     <button
       type="button"
-      className={`org-node ${root ? "root" : ""} ${leaf ? "leaf" : ""} ${selected ? "selected" : ""}`}
+      className={`org-node ${root ? "root" : ""} ${leaf ? "leaf" : ""} ${selected ? "selected" : ""} ${selected ? styles.selectedNode : ""} ${dimmed ? styles.dimmedNode : ""}`}
       onClick={onClick}
       aria-pressed={selected}
     >
       <span className="org-node-copy"><strong>{label}</strong></span>
     </button>
+  );
+}
+
+function AnimatedStageScore({
+  value,
+  stage,
+  updateSequence,
+}: {
+  value: number | null;
+  stage: string;
+  updateSequence: number;
+}) {
+  const initialValue = value ?? 0;
+  const [displayValue, setDisplayValue] = useState(initialValue);
+  const [change, setChange] = useState<number | null>(null);
+  const [isAnimating, setIsAnimating] = useState(false);
+  const displayValueRef = useRef(initialValue);
+  const previousTargetRef = useRef<number | null | undefined>(undefined);
+
+  useEffect(() => {
+    const previousTarget = previousTargetRef.current;
+    previousTargetRef.current = value;
+
+    if (value === null) {
+      displayValueRef.current = 0;
+      setDisplayValue(0);
+      setChange(null);
+      setIsAnimating(false);
+      return;
+    }
+
+    const from = displayValueRef.current;
+    const difference = previousTarget === undefined || previousTarget === null ? 0 : value - previousTarget;
+    const hasValueChange = Math.abs(value - from) > 0.02;
+    setChange(Math.abs(difference) >= 0.05 ? difference : null);
+
+    if (!hasValueChange) {
+      displayValueRef.current = value;
+      setDisplayValue(value);
+      setIsAnimating(false);
+      return;
+    }
+
+    setIsAnimating(true);
+    const startedAt = performance.now();
+    const duration = 900;
+    let frame = 0;
+    const animate = (now: number) => {
+      const elapsed = Math.min(1, (now - startedAt) / duration);
+      const eased = 1 - Math.pow(1 - elapsed, 3);
+      const nextValue = from + (value - from) * eased;
+      displayValueRef.current = nextValue;
+      setDisplayValue(nextValue);
+      if (elapsed < 1) {
+        frame = requestAnimationFrame(animate);
+      } else {
+        displayValueRef.current = value;
+        setDisplayValue(value);
+        setIsAnimating(false);
+      }
+    };
+    frame = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(frame);
+  }, [value, updateSequence]);
+
+  const progress = Math.max(0, Math.min(100, displayValue));
+  const direction = change === null ? "" : change > 0 ? styles.scoreUp : styles.scoreDown;
+
+  return (
+    <div
+      className={`maturity-stage-score ${styles.animatedScore} ${isAnimating ? styles.scoreAnimating : ""}`}
+      style={{ "--stage-progress": `${progress}%` } as React.CSSProperties}
+      aria-label={`نسبة ${stage}: ${value === null ? "لا توجد بيانات" : `${value.toFixed(1)} بالمئة`}`}
+    >
+      <strong>{value === null ? "—" : displayValue.toFixed(1)}</strong><span>%</span>
+      {change !== null && <b className={`${styles.scoreChange} ${direction}`} aria-hidden="true">{change > 0 ? "↑" : "↓"} {Math.abs(change).toFixed(1)}</b>}
+      <output className={styles.screenReaderUpdate} aria-live="polite">
+        {isAnimating ? `تتغير نسبة مرحلة ${stage}` : `نسبة مرحلة ${stage} ${value === null ? "لا توجد بيانات" : `${value.toFixed(1)} بالمئة`}`}
+      </output>
+    </div>
   );
 }
 
@@ -97,6 +176,7 @@ export default function Home() {
   const [activeGroup, setActiveGroup] = useState(defaultData.groups[0]);
   const [selected, setSelected] = useState<SelectedNode | null>(null);
   const [openStage, setOpenStage] = useState<string | null>(null);
+  const [selectionMotion, setSelectionMotion] = useState(0);
   const loadedVersionId = useRef<string | null>(null);
 
   const groupUnits = useMemo(
@@ -113,6 +193,7 @@ export default function Home() {
   }), [activeGroup, groupUnits]);
 
   const activeNode = selected?.group === activeGroup ? selected : groupRoot;
+  const hasFocusedNode = activeNode.kind !== "group";
   const activeUnitCodeSet = useMemo(() => new Set(activeNode.unitCodes), [activeNode.unitCodes]);
 
   useEffect(() => {
@@ -127,6 +208,7 @@ export default function Home() {
         setActiveGroup(nextData.groups[0]);
         setSelected(null);
         setOpenStage(null);
+        setSelectionMotion((current) => current + 1);
       })
       .catch(() => undefined);
     refreshData();
@@ -214,6 +296,13 @@ export default function Home() {
     setActiveGroup(group);
     setSelected(null);
     setOpenStage(null);
+    setSelectionMotion((current) => current + 1);
+  }
+
+  function selectRoot() {
+    setSelected(null);
+    setOpenStage(null);
+    setSelectionMotion((current) => current + 1);
   }
 
   function selectMain(mainUnit: string, units: OrgUnit[]) {
@@ -224,6 +313,8 @@ export default function Home() {
       group: activeGroup,
       unitCodes: units.map((unit) => unit.code),
     });
+    setOpenStage(null);
+    setSelectionMotion((current) => current + 1);
   }
 
   function selectUnit(unit: OrgUnit) {
@@ -234,6 +325,8 @@ export default function Home() {
       group: activeGroup,
       unitCodes: [unit.code],
     });
+    setOpenStage(null);
+    setSelectionMotion((current) => current + 1);
   }
 
   return (
@@ -260,11 +353,10 @@ export default function Home() {
           const value = stageMetrics[stage] ?? null;
           const maturity = maturityLabel(value, data.thresholds);
           return (
-            <button className={`maturity-stage ${stageClasses[index]}`} type="button" key={stage} onClick={() => setOpenStage(stage)}>
+            <button className={`maturity-stage ${stageClasses[index]} ${styles.stageCard}`} type="button" key={stage} onClick={() => setOpenStage(stage)}>
+              <i className={styles.stageUpdatePulse} aria-hidden="true" key={`${stage}-${selectionMotion}`} />
               <div className="maturity-stage-heading"><span>{String(index + 1).padStart(2, "0")}</span><div><small>مرحلة القياس</small><h2>{stage}</h2></div></div>
-              <div className="maturity-stage-score" style={{ "--stage-progress": `${value ?? 0}%` } as React.CSSProperties}>
-                <strong>{scoreText(value)}</strong><span>%</span>
-              </div>
+              <AnimatedStageScore value={value} stage={stage} updateSequence={selectionMotion} />
               <div className="maturity-stage-foot">
                 <div className="maturity-dots" aria-label={`مستوى النضج: ${maturity}`}>
                   {maturityStates.map((state) => <i className={maturity === state ? "active" : ""} key={state}>{state}</i>)}
@@ -276,7 +368,7 @@ export default function Home() {
         })}
       </section>
 
-      <section className={`organization-panel ${activeGroup === "الجهاز العسكري" ? "military-organization" : ""}`}>
+      <section className={`organization-panel ${activeGroup === "الجهاز العسكري" ? "military-organization" : ""} ${hasFocusedNode ? styles.nodeSelectionActive : ""}`}>
         <div className="organization-head">
           <div><p>الهيكل التنظيمي</p><h2>اختر المجموعة ثم الوحدة المطلوب تحليلها</h2></div>
           <div className="organization-tabs" role="tablist" aria-label="المجموعات التنظيمية">
@@ -290,7 +382,7 @@ export default function Home() {
         <div className="org-chart-scroll">
           <div className="org-chart">
             <div className="org-root-wrap">
-              <OrgNode label={activeGroup} selected={activeNode.id === groupRoot.id} root onClick={() => setSelected(null)} />
+              <OrgNode label={activeGroup} selected={activeNode.id === groupRoot.id} dimmed={hasFocusedNode} root onClick={selectRoot} />
             </div>
             <div className="org-trunk" aria-hidden="true" />
             {activeGroup === "الجهاز العسكري" ? (
@@ -304,6 +396,7 @@ export default function Home() {
                           <OrgNode
                             label={branch.mainUnit}
                             selected={activeNode.id === mainId}
+                            dimmed={hasFocusedNode && activeNode.id !== mainId}
                             onClick={() => selectMain(branch.mainUnit, branch.units)}
                           />
                         </div>
@@ -322,6 +415,7 @@ export default function Home() {
                       <OrgNode
                         label={branch.mainUnit}
                         selected={activeNode.id === mainId}
+                        dimmed={hasFocusedNode && activeNode.id !== mainId}
                         onClick={() => selectMain(branch.mainUnit, branch.units)}
                       />
                       {branch.children.length > 0 && (
@@ -331,6 +425,7 @@ export default function Home() {
                               key={unit.code}
                               label={unit.measuredUnit}
                               selected={activeNode.id === `unit:${unit.code}`}
+                              dimmed={hasFocusedNode && activeNode.id !== `unit:${unit.code}`}
                               leaf
                               onClick={() => selectUnit(unit)}
                             />
