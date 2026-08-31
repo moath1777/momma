@@ -91,10 +91,7 @@ function OrgNode({
         <strong>{label}</strong>
         {!root && maturity ? (
           <span className={styles.nodeMaturitySignals} aria-label={`مستوى النضج الكلي: ${maturity}`}>
-            {maturityStates.map((state) => {
-              const signalClass = state === "أولي" ? styles.nodeMaturityInitial : state === "جزئي" ? styles.nodeMaturityPartial : styles.nodeMaturityAdvanced;
-              return <span className={`${styles.nodeMaturitySignal} ${signalClass} ${maturity === state ? styles.nodeMaturityActive : ""}`} key={state}><i />{state}</span>;
-            })}
+            <span className={`${styles.nodeMaturitySignal} ${maturity === "أولي" ? styles.nodeMaturityInitial : maturity === "جزئي" ? styles.nodeMaturityPartial : styles.nodeMaturityAdvanced} ${styles.nodeMaturityActive}`}><i />{maturity}</span>
           </span>
         ) : null}
       </span>
