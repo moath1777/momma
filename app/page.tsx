@@ -424,7 +424,17 @@ export default function Home() {
               <button role="tab" aria-selected={activeGroup === group} className={activeGroup === group ? "active" : ""} type="button" key={group} onClick={() => selectGroup(group)}>{group}</button>
             ))}
           </div>
-          <div className="organization-legend"><i /> العقدة المحددة</div>
+          <aside className="organization-legend" aria-label="دليل مستويات النضج">
+            <div className="organization-legend-head">
+              <strong>مستوى النضج</strong>
+              <span className="selected-node-legend"><i /> العقدة المحددة</span>
+            </div>
+            <div className="organization-legend-items">
+              <span className="organization-legend-item initial"><i />أولي</span>
+              <span className="organization-legend-item partial"><i />جزئي</span>
+              <span className="organization-legend-item advanced"><i />متقدم</span>
+            </div>
+          </aside>
         </div>
 
         <div className="org-chart-scroll">
