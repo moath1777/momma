@@ -425,14 +425,11 @@ export default function Home() {
             ))}
           </div>
           <aside className="organization-legend" aria-label="دليل مستويات النضج">
-            <div className="organization-legend-head">
-              <strong>مستوى النضج</strong>
-              <span className="selected-node-legend"><i /> العقدة المحددة</span>
-            </div>
+            <strong className="organization-legend-title">مستوى النضج</strong>
             <div className="organization-legend-items">
-              <span className="organization-legend-item initial"><i />أولي</span>
-              <span className="organization-legend-item partial"><i />جزئي</span>
-              <span className="organization-legend-item advanced"><i />متقدم</span>
+              <span className="organization-legend-item initial"><i /><span><strong>أولي</strong><small>حتى {data.thresholds.initialMax}%</small></span></span>
+              <span className="organization-legend-item partial"><i /><span><strong>جزئي</strong><small>أكثر من {data.thresholds.initialMax}% إلى {data.thresholds.advancedMinExclusive}%</small></span></span>
+              <span className="organization-legend-item advanced"><i /><span><strong>متقدم</strong><small>أكثر من {data.thresholds.advancedMinExclusive}%</small></span></span>
             </div>
           </aside>
         </div>
