@@ -54,6 +54,10 @@ function average(values: number[]) {
   return values.reduce((sum, value) => sum + value, 0) / values.length;
 }
 
+function roundedPercentage(value: number) {
+  return Math.round(value);
+}
+
 function maturityLabel(value: number | null, thresholds: DataPayload["thresholds"]) {
   if (value === null) return "لا توجد بيانات";
   if (value <= thresholds.initialMax) return "أولي";
@@ -397,9 +401,9 @@ export default function Home() {
                 <div>
                   <small>مرحلة القياس</small>
                   <h2>{stage}</h2>
-                  <div className="maturity-stage-target" aria-label={`مستهدف عام 2026 لمرحلة ${stage}: ${target === null ? "لا توجد بيانات" : `${target.toFixed(1)} بالمئة`}`}>
+                  <div className="maturity-stage-target" aria-label={`مستهدف عام 2026 لمرحلة ${stage}: ${target === null ? "لا توجد بيانات" : `${roundedPercentage(target)} بالمئة`}`}>
                     <span>مستهدف 2026</span>
-                    <strong>{target === null ? "—" : `${target.toFixed(1)}%`}</strong>
+                    <strong>{target === null ? "—" : `${roundedPercentage(target)}%`}</strong>
                     {gap !== null && <em>{gap > 0.05 ? `فجوة ${gap.toFixed(1)} نقطة` : gap < -0.05 ? `متجاوز بـ ${Math.abs(gap).toFixed(1)} نقطة` : "تم تحقيق المستهدف"}</em>}
                   </div>
                 </div>
@@ -521,7 +525,7 @@ export default function Home() {
                             <div className="checkpoint-copy"><strong>{row.checkpointText}</strong>{row.notes && <p>{row.notes}</p>}{row.provider && <small>الجهة المزودة: {row.provider}</small>}</div>
                             <div className="checkpoint-value">
                               <div><small>الحالي</small><b>{row.verification.toFixed(0)}%</b></div>
-                              <div className="checkpoint-target"><small>مستهدف 2026</small><b>{row.target2026.toFixed(0)}%</b></div>
+                              <div className="checkpoint-target"><small>مستهدف 2026</small><b>{roundedPercentage(row.target2026)}%</b></div>
                               <span>{row.status || maturityLabel(row.verification, data.thresholds)}</span>
                             </div>
                           </article>
