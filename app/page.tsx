@@ -169,11 +169,11 @@ function AnimatedStageScore({
     <div
       className={`maturity-stage-score ${styles.animatedScore} ${isAnimating ? styles.scoreAnimating : ""}`}
       style={{ "--stage-progress": `${progress}%` } as React.CSSProperties}
-      aria-label={`نسبة ${stage}: ${value === null ? "لا توجد بيانات" : `${value.toFixed(1)} بالمئة`}`}
+      aria-label={`نسبة ${stage}: ${value === null ? "لا توجد بيانات" : `${roundedPercentage(value)} بالمئة`}`}
     >
-      <strong>{value === null ? "—" : displayValue.toFixed(1)}</strong><span>%</span>
+      <strong>{value === null ? "—" : roundedPercentage(displayValue)}</strong><span>%</span>
       <output className={styles.screenReaderUpdate} aria-live="polite">
-        {isAnimating ? `تتغير نسبة مرحلة ${stage}` : `نسبة مرحلة ${stage} ${value === null ? "لا توجد بيانات" : `${value.toFixed(1)} بالمئة`}`}
+        {isAnimating ? `تتغير نسبة مرحلة ${stage}` : `نسبة مرحلة ${stage} ${value === null ? "لا توجد بيانات" : `${roundedPercentage(value)} بالمئة`}`}
       </output>
     </div>
   );
@@ -404,7 +404,7 @@ export default function Home() {
                   <div className="maturity-stage-target" aria-label={`مستهدف عام 2026 لمرحلة ${stage}: ${target === null ? "لا توجد بيانات" : `${roundedPercentage(target)} بالمئة`}`}>
                     <span>مستهدف 2026</span>
                     <strong>{target === null ? "—" : `${roundedPercentage(target)}%`}</strong>
-                    {gap !== null && <em>{gap > 0.05 ? `فجوة ${gap.toFixed(1)} نقطة` : gap < -0.05 ? `متجاوز بـ ${Math.abs(gap).toFixed(1)} نقطة` : "تم تحقيق المستهدف"}</em>}
+                    {gap !== null && <em>{gap > 0.05 ? `فجوة ${roundedPercentage(gap)} نقطة` : gap < -0.05 ? `متجاوز بـ ${roundedPercentage(Math.abs(gap))} نقطة` : "تم تحقيق المستهدف"}</em>}
                   </div>
                 </div>
               </div>
