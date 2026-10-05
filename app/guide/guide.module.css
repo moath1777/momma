@@ -1,13 +1,6 @@
 .page { min-height: 100dvh; background: #f6f8f6; font-size: 14px; line-height: 1.9; }
 .page a { text-decoration: none; }
 .page a:focus-visible, .page summary:focus-visible { outline: 3px solid #b98225; outline-offset: 5px; }
-.header { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 16px max(24px, calc((100vw - 1280px) / 2)); background: #fff; border-bottom: 1px solid #dce5e1; }
-.brand { flex-shrink: 0; }
-.brand img { width: 250px; height: 64px; object-fit: contain; }
-.nav { display: flex; align-items: center; gap: 6px; padding: 5px; background: #f3f6f4; border-radius: 12px; }
-.nav a { padding: 9px 16px; color: #586a60; font-size: 13px; font-weight: 700; border-radius: 9px; white-space: nowrap; }
-.nav a:hover { color: #155334; background: #e6eee8; }
-.nav a[aria-current] { background: #1f6e43; color: #fff; }
 .container { max-width: 1280px; margin: auto; padding: 44px 24px 56px; }
 .hero { display: grid; grid-template-columns: 1.35fr 1fr; gap: 60px; align-items: center; padding-bottom: 44px; }
 .eyebrow { color: #1f6e43; font-size: 13px; font-weight: 700; margin: 0 0 12px; }
@@ -102,7 +95,6 @@
   .example { grid-template-columns: 1fr; }.exampleCard { max-width: 320px; width: 100%; margin: auto; }.methods { grid-template-columns: 1fr; }.levels { gap: 6px; }.levels > div { padding: 10px; }
 }
 @media (max-width: 740px) {
-  .header { flex-direction: column; gap: 14px; padding: 16px; }.brand img { width: 220px; height: 56px; }.nav { justify-content: center; width: 100%; }.nav a { padding: 9px 12px; font-size: 12px; }
   .container { padding: 26px 16px 30px; }.hero { grid-template-columns: 1fr; gap: 28px; padding-bottom: 28px; }.hero h1 { font-size: 33px; }.intro { font-size: 14px; }.overview { padding: 22px; }
   .layout { grid-template-columns: 1fr; padding-top: 22px; gap: 22px; }.sidebar { position: static; }.sidebar nav { display: flex; flex-wrap: wrap; gap: 6px; }.sidebar nav > p { width: 100%; margin-inline-start: 0; }.sidebar nav a { padding: 7px 11px; background: #eaf1ec; font-size: 12px; gap: 8px; }.sideNote { display: none; }
   .section { padding: 22px 18px; border-radius: 14px; }.sectionHeading { gap: 12px; }.sectionHeading h2 { font-size: 20px; }.steps li { gap: 10px; }.steps h3 { font-size: 14px; }.steps p { font-size: 13px; }

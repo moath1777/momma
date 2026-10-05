@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
+import { ministryStageAverages } from "../app/maturity-metrics.ts";
 
 async function render(pathname = "/") {
   const workerUrl = new URL("../dist/server/index.js", import.meta.url);
@@ -26,6 +27,7 @@ test("server-renders the organizational maturity dashboard", async () => {
   assert.match(html, /المرتبطة بسمو الوزير/);
   assert.match(html, /الشؤون التنفيذية/);
   assert.match(html, /الجهاز العسكري/);
+  assert.match(html, /مستوى الوزارة/);
   assert.match(html, /التصميم/);
   assert.match(html, /البناء المؤسسي/);
   assert.match(html, /التشغيل/);
@@ -46,6 +48,30 @@ test("embedded workbook data matches the new Excel structure", async () => {
   assert.ok(data.rows.every((row) => row.verification >= 0 && row.verification <= 100));
   assert.ok(data.rows.every((row) => row.target2026 >= 0 && row.target2026 <= 100));
   assert.ok(data.scores.every((score) => score.target2026 >= 0 && score.target2026 <= 100));
+});
+
+test("ministry stages give each group equal weight despite different unit counts", () => {
+  const groups = ["minister", "executive", "military"];
+  const units = groups.flatMap((group, index) => Array.from({ length: index + 1 }, (_, unit) => ({ code: `${group}-${unit}`, group })));
+  const scores = units.flatMap((unit, index) => [
+    { unitCode: unit.code, stage: "design", value: [10, 40, 60, 80, 80, 80][index], target2026: [20, 50, 70, 90, 90, 90][index] },
+    { unitCode: unit.code, stage: "operation", value: groups.indexOf(unit.group) + 1.49, target2026: groups.indexOf(unit.group) + 11.49 },
+  ]);
+  const metrics = ministryStageAverages({ groups, units, scores, stages: ["design", "operation"] });
+  assert.ok(Math.abs(metrics.design.value - (10 + 50 + 80) / 3) < 1e-10);
+  assert.ok(Math.abs(metrics.design.target - (20 + 60 + 90) / 3) < 1e-10);
+  assert.ok(Math.abs(metrics.operation.value - 2.49) < 1e-10);
+  assert.ok(Math.abs(metrics.operation.target - 12.49) < 1e-10);
+});
+
+test("ministry stages show no result when one group has no stage data", () => {
+  const data = {
+    groups: ["minister", "executive", "military"],
+    stages: ["design", "operation"],
+    units: [{ code: "a", group: "minister" }, { code: "b", group: "executive" }, { code: "c", group: "military" }],
+    scores: [{ unitCode: "a", stage: "design", value: 30, target2026: 60 }, { unitCode: "b", stage: "design", value: 60, target2026: 90 }],
+  };
+  assert.deepEqual(ministryStageAverages(data), { design: { value: null, target: null }, operation: { value: null, target: null } });
 });
 
 test("upload page explains the required workbook sheets", async () => {

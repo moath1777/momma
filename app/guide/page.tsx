@@ -1,6 +1,7 @@
-/* Native links and images match the existing Vinext pages and avoid Next-only client dependencies. */
-/* eslint-disable @next/next/no-html-link-for-pages, @next/next/no-img-element */
+/* Native links match the navigation used by the Vinext app. */
+/* eslint-disable @next/next/no-html-link-for-pages */
 import styles from "./guide.module.css";
+import AppHeader from "../components/app-header";
 
 const contents = [
   ["start", "ابدأ التحليل"],
@@ -13,18 +14,9 @@ const contents = [
 export default function GuidePage() {
   return (
     <main className={styles.page}>
-      <header className={styles.header}>
-        <a href="/" className={styles.brand} aria-label="العودة إلى لوحة التحليل">
-          <img src="/mngdp-logo.png" alt="برنامج تطوير وزارة الحرس الوطني" width={250} height={64} />
-        </a>
-        <nav className={styles.nav} aria-label="التنقل الرئيسي">
-          <a href="/">لوحة التحليل</a>
-          <a href="/guide" aria-current="page">الدليل الإرشادي</a>
-          <a href="/upload">رفع البيانات</a>
-        </nav>
-      </header>
+      <AppHeader active="guide" />
 
-      <div className={styles.container}>
+      <div className={styles.container} id="main-content">
         <section className={styles.hero} aria-labelledby="guide-title">
           <div>
             <p className={styles.eyebrow}>دليل استخدام لوحة قياس النضج</p>
@@ -56,9 +48,9 @@ export default function GuidePage() {
             <section id="start" className={styles.section} aria-labelledby="start-title">
               <div className={styles.sectionHeading}><span>01</span><div><p>اختيار نطاق التحليل</p><h2 id="start-title">اختر المجموعة، ثم الوحدة</h2></div></div>
               <ol className={styles.steps}>
-                <li><span>1</span><div><h3>اختر المجموعة من أعلى الهيكل التنظيمي</h3><p>المرتبطة بسمو الوزير، أو الشؤون التنفيذية، أو الجهاز العسكري. سيظهر الهيكل الخاص بالمجموعة المختارة.</p></div></li>
-                <li><span>2</span><div><h3>اضغط على الوحدة التي تريد تحليلها</h3><p>اختر وحدة رئيسية لقراءة نتائج الوحدات التابعة لها، أو اختر وحدة فرعية للاطلاع على نتيجتها.</p></div></li>
-                <li><span>3</span><div><h3>تأكد من «النطاق المحدد»</h3><p>يتغير الاسم أعلى الصفحة وتتحدث بطاقات المراحل الثلاث تلقائيًا. عند اختيار المجموعة، تعرض اللوحة متوسط درجات وحداتها.</p></div></li>
+                <li><span>1</span><div><h3>ابدأ بمستوى الوزارة أو إحدى مجموعاتها</h3><p>بطاقة «مستوى الوزارة» في الأعلى تعرض المتوسط العام للمجموعات الثلاث. تحتها يمكنك اختيار المرتبطة بسمو الوزير، أو الشؤون التنفيذية، أو الجهاز العسكري لاستكشاف هيكل المجموعة.</p></div></li>
+                <li><span>2</span><div><h3>ابحث عن الوحدة أو اخترها من الهيكل</h3><p>استخدم البحث بالاسم أو الرمز، أو بدّل إلى «قائمة» لرؤية الوحدات بسهولة. اختر وحدة رئيسية من الهيكل لقراءة نتائج وحداتها التابعة.</p></div></li>
+                <li><span>3</span><div><h3>تأكد من «النطاق المحدد»</h3><p>عند اختيار وحدة، تنتقل الصفحة إلى بطاقات المراحل وتضعها في منتصف الشاشة، ثم تبدأ حركة الأرقام بعد ربع ثانية من الوصول. عند اختيار المجموعة، تعرض اللوحة متوسط درجات وحداتها.</p></div></li>
               </ol>
               <div className={styles.tip}><strong>للمقارنة بين الوحدات</strong><p>اختر الوحدة الأولى واقرأ نتائجها، ثم اختر الوحدة الأخرى. تحقق من اسم النطاق في كل مرة.</p></div>
             </section>
@@ -87,14 +79,14 @@ export default function GuidePage() {
                 <div><span className={styles.greenDot} /><strong>متقدم</strong><p>ضمن النطاق الأعلى للقياس</p></div>
               </div>
               <p className={styles.footnote}>الحدود المعتمدة لكل مستوى تظهر في مفتاح «مستوى النضج» بجانب الهيكل التنظيمي. التصنيف يعتمد على النسبة الأصلية قبل التقريب.</p>
-              <details className={styles.calculation}><summary>من أين تأتي درجة المرحلة؟</summary><p>تُقرأ درجة كل وحدة من ورقة «النتائج» في ملف Excel. إذا شمل النطاق عدة وحدات، تُعرض المتوسطات الحسابية لدرجاتها الحالية ومستهدفاتها لكل مرحلة.</p></details>
+              <details className={styles.calculation}><summary>من أين تأتي درجة المرحلة؟</summary><p>تُقرأ درجة كل وحدة من ورقة «النتائج» في ملف Excel. إذا شمل النطاق عدة وحدات، تُعرض المتوسطات الحسابية لدرجاتها الحالية ومستهدفاتها لكل مرحلة. على مستوى الوزارة، تُحسب نتيجة كل مجموعة أولًا، ثم يؤخذ متوسط نتائج المجموعات الثلاث بالتساوي، دون تقريب القيم أثناء الحساب.</p></details>
             </section>
 
             <section id="checkpoints" className={styles.section} aria-labelledby="checkpoints-title">
               <div className={styles.sectionHeading}><span>03</span><div><p>الانتقال إلى التفاصيل</p><h2 id="checkpoints-title">راجع نقاط التحقق لكل مرحلة</h2></div></div>
-              <p className={styles.sectionIntro}>بعد اختيار وحدة رئيسية أو فرعية، اضغط على بطاقة التصميم أو البناء المؤسسي أو التشغيل لفتح تفاصيلها.</p>
-              <div className={styles.checkpointFlow}><span>اختر وحدة</span><b aria-hidden="true">←</b><span>اضغط على المرحلة</span><b aria-hidden="true">←</b><span>راجع نقاط التحقق</span></div>
-              <ul className={styles.checklist}><li>تظهر النقاط مجمّعة حسب العنصر، مع رمز كل نقطة ووصفها والوحدة التابعة لها.</li><li>قارن «الحالي» مع «مستهدف 2026» لكل نقطة لتحديد مواضع التحسين.</li><li>راجع الملاحظات والجهة المزودة للبيانات عند توفرها، ثم أغلق النافذة بزر × للعودة إلى اللوحة.</li></ul>
+              <p className={styles.sectionIntro}>بعد اختيار وحدة رئيسية أو فرعية، اضغط «نقاط التحقق» أسفل بطاقة التصميم أو البناء المؤسسي أو التشغيل لفتح تفاصيلها.</p>
+              <div className={styles.checkpointFlow}><span>اختر وحدة</span><b aria-hidden="true">←</b><span>افتح نقاط التحقق</span><b aria-hidden="true">←</b><span>ابحث وقارن النتائج</span></div>
+              <ul className={styles.checklist}><li>تظهر النقاط مجمّعة حسب العنصر، مع رمز كل نقطة ووصفها والوحدة التابعة لها.</li><li>استخدم البحث أو زر «النقاط دون المستهدف» لتحديد مواضع التحسين، وقارن «الحالي» مع «مستهدف 2026».</li><li>راجع الملاحظات والجهة المزودة للبيانات عند توفرها، ثم أغلق النافذة بزر الإغلاق أو مفتاح Escape.</li></ul>
               <div className={styles.tip}><strong>بطاقة المرحلة لا تفتح؟</strong><p>عند تحديد المجموعة كاملة، تعرض البطاقات ملخص النتائج فقط. اختر وحدة رئيسية أو فرعية من الهيكل أولًا.</p></div>
             </section>
 

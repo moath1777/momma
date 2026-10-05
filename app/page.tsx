@@ -3,6 +3,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import modelData from "./model-data.json";
 import styles from "./dashboard-interactions.module.css";
+import AppHeader from "./components/app-header";
+import Icon from "./components/icon";
+import Dialog from "./components/dialog";
+import { ministryStageAverages } from "./maturity-metrics";
 import {
   LOCAL_SYNC_FINGERPRINT_KEY,
   fileFingerprint,
@@ -18,7 +22,7 @@ type DataPayload = ParsedData;
 type SelectedNode = {
   id: string;
   label: string;
-  kind: "group" | "main" | "unit";
+  kind: "ministry" | "group" | "main" | "unit";
   group: string;
   unitCodes: string[];
 };
@@ -73,6 +77,10 @@ function sortedUnique(values: string[]) {
   return [...new Set(values)].sort((a, b) => a.localeCompare(b, "ar"));
 }
 
+function searchText(value: string) {
+  return value.normalize("NFKC").replace(/[إأآٱ]/g, "ا").replace(/ى/g, "ي").replace(/[\u064B-\u065F\u0670\u0640]/g, "").toLowerCase();
+}
+
 function OrgNode({
   label,
   selected,
@@ -120,33 +128,17 @@ function AnimatedStageScore({
 }) {
   const initialValue = value ?? 0;
   const [displayValue, setDisplayValue] = useState(initialValue);
-  const [isAnimating, setIsAnimating] = useState(false);
   const displayValueRef = useRef(initialValue);
 
   useEffect(() => {
-    if (value === null) {
-      displayValueRef.current = 0;
-      setDisplayValue(0);
-      setIsAnimating(false);
-      return;
-    }
-
+    if (value === null) return;
     const from = displayValueRef.current;
-    const hasValueChange = Math.abs(value - from) > 0.02;
-
-    if (!hasValueChange) {
-      displayValueRef.current = value;
-      setDisplayValue(value);
-      setIsAnimating(false);
-      return;
-    }
-
-    setIsAnimating(true);
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const startedAt = performance.now();
-    const duration = 900;
+    const duration = reducedMotion ? 0 : 500;
     let frame = 0;
     const animate = (now: number) => {
-      const elapsed = Math.min(1, (now - startedAt) / duration);
+      const elapsed = duration ? Math.min(1, (now - startedAt) / duration) : 1;
       const eased = 1 - Math.pow(1 - elapsed, 3);
       const nextValue = from + (value - from) * eased;
       displayValueRef.current = nextValue;
@@ -156,14 +148,14 @@ function AnimatedStageScore({
       } else {
         displayValueRef.current = value;
         setDisplayValue(value);
-        setIsAnimating(false);
       }
     };
     frame = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(frame);
   }, [value, updateSequence]);
 
-  const progress = Math.max(0, Math.min(100, displayValue));
+  const progress = value === null ? 0 : Math.max(0, Math.min(100, displayValue));
+  const isAnimating = value !== null && Math.abs(displayValue - value) > 0.05;
 
   return (
     <div
@@ -183,10 +175,29 @@ export default function Home() {
   const [data, setData] = useState<DataPayload>(defaultData);
   const [activeVersionId, setActiveVersionId] = useState<string | null>(null);
   const [activeGroup, setActiveGroup] = useState(defaultData.groups[0]);
+  const [isMinistry, setIsMinistry] = useState(false);
   const [selected, setSelected] = useState<SelectedNode | null>(null);
   const [openStage, setOpenStage] = useState<string | null>(null);
   const [selectionMotion, setSelectionMotion] = useState(0);
+  const [unitQuery, setUnitQuery] = useState("");
+  const [viewMode, setViewMode] = useState<"chart" | "list">("chart");
+  const [checkpointQuery, setCheckpointQuery] = useState("");
+  const [onlyGaps, setOnlyGaps] = useState(false);
+  const [dataUnavailable, setDataUnavailable] = useState(false);
   const loadedVersionId = useRef<string | null>(null);
+  const selectionScrollFrame = useRef<number | null>(null);
+  const selectionDelayTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const stagesRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => () => {
+    if (selectionScrollFrame.current !== null) cancelAnimationFrame(selectionScrollFrame.current);
+    if (selectionDelayTimer.current !== null) clearTimeout(selectionDelayTimer.current);
+  }, []);
+
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => { if (window.matchMedia("(max-width: 700px)").matches) setViewMode("list"); });
+    return () => cancelAnimationFrame(frame);
+  }, []);
 
   const groupUnits = useMemo(
     () => data.units.filter((unit) => unit.group === activeGroup),
@@ -201,9 +212,17 @@ export default function Home() {
     unitCodes: groupUnits.map((unit) => unit.code),
   }), [activeGroup, groupUnits]);
 
-  const activeNode = selected?.group === activeGroup ? selected : groupRoot;
-  const hasFocusedNode = activeNode.kind !== "group";
-  const canShowCheckpoints = activeNode.kind !== "group";
+  const ministryRoot = useMemo<SelectedNode>(() => ({
+    id: "ministry",
+    label: "مستوى الوزارة",
+    kind: "ministry",
+    group: "",
+    unitCodes: data.units.map((unit) => unit.code),
+  }), [data.units]);
+
+  const activeNode = isMinistry ? ministryRoot : selected?.group === activeGroup ? selected : groupRoot;
+  const hasFocusedNode = activeNode.kind === "main" || activeNode.kind === "unit";
+  const canShowCheckpoints = hasFocusedNode;
   const activeUnitCodeSet = useMemo(() => new Set(activeNode.unitCodes), [activeNode.unitCodes]);
 
   function nodeMaturity(unitCodes: string[]) {
@@ -223,19 +242,24 @@ export default function Home() {
 
   useEffect(() => {
     const refreshData = () => fetch(`/api/data?refresh=${Date.now()}`, { cache: "no-store" })
-      .then((response) => response.ok ? response.json() : null)
+      .then((response) => { if (!response.ok) throw new Error("Data unavailable"); return response.json(); })
       .then((result) => {
+        setDataUnavailable(false);
         const nextData = result?.data ? normalizeData(result.data) : null;
         if (!nextData || loadedVersionId.current === result.id) return;
         loadedVersionId.current = result.id;
         setData(nextData);
         setActiveVersionId(result.id);
-        setActiveGroup(nextData.groups[0]);
-        setSelected(null);
-        setOpenStage(null);
+        setActiveGroup((current) => nextData.groups.includes(current) ? current : nextData.groups[0]);
+        setSelected((current) => {
+          if (!current || !nextData.groups.includes(current.group)) return null;
+          const units = nextData.units.filter((unit) => unit.group === current.group && (current.kind === "main" ? unit.mainUnit === current.label : unit.code === current.unitCodes[0]));
+          return units.length ? { ...current, label: current.kind === "unit" ? units[0].measuredUnit : current.label, unitCodes: units.map((unit) => unit.code) } : null;
+        });
+        setOpenStage((current) => current && nextData.stages.includes(current) ? current : null);
         setSelectionMotion((current) => current + 1);
       })
-      .catch(() => undefined);
+      .catch(() => setDataUnavailable(true));
     refreshData();
     const watch = window.setInterval(refreshData, 2500);
     return () => window.clearInterval(watch);
@@ -272,28 +296,24 @@ export default function Home() {
     return () => { stopped = true; window.clearInterval(watch); };
   }, []);
 
-  useEffect(() => {
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setOpenStage(null);
-    };
-    window.addEventListener("keydown", closeOnEscape);
-    return () => window.removeEventListener("keydown", closeOnEscape);
-  }, []);
+  const ministryMetrics = useMemo(() => ministryStageAverages(data), [data]);
 
   const stageMetrics = useMemo(() => Object.fromEntries(data.stages.map((stage) => {
+    if (isMinistry) return [stage, ministryMetrics[stage].value];
     const values = data.scores
       .filter((score) => activeUnitCodeSet.has(score.unitCode) && score.stage === stage)
       .map((score) => score.value);
     return [stage, average(values)];
-  })) as Record<string, number | null>, [activeUnitCodeSet, data.scores, data.stages]);
+  })) as Record<string, number | null>, [activeUnitCodeSet, data.scores, data.stages, isMinistry, ministryMetrics]);
 
   const stageTargets = useMemo(() => Object.fromEntries(data.stages.map((stage) => {
+    if (isMinistry) return [stage, ministryMetrics[stage].target];
     const values = data.scores
       .filter((score) => activeUnitCodeSet.has(score.unitCode) && score.stage === stage)
       .map((score) => score.target2026)
       .filter((value) => Number.isFinite(value));
     return [stage, average(values)];
-  })) as Record<string, number | null>, [activeUnitCodeSet, data.scores, data.stages]);
+  })) as Record<string, number | null>, [activeUnitCodeSet, data.scores, data.stages, isMinistry, ministryMetrics]);
 
   const mainBranches = useMemo(() => sortedUnique(groupUnits.map((unit) => unit.mainUnit)).map((mainUnit) => {
     const units = groupUnits.filter((unit) => unit.mainUnit === mainUnit);
@@ -309,93 +329,158 @@ export default function Home() {
     const sizes = [6, 5, 6, 4];
     let offset = 0;
     return sizes.map((size, index) => {
-      const branches = orderedBranches.slice(offset, offset + size);
+      const branches = orderedBranches.slice(offset, index === sizes.length - 1 ? undefined : offset + size);
       offset += size;
       return { id: `military-column-${index + 1}`, featured: index === 0, branches };
     });
   }, [mainBranches]);
 
-  const modalRows = useMemo(() => {
+  const allModalRows = useMemo(() => {
     if (!openStage) return [];
     return data.rows
       .filter((row) => activeUnitCodeSet.has(row.unitCode) && row.stage === openStage)
       .sort((a, b) => a.element.localeCompare(b.element, "ar") || a.checkpointCode.localeCompare(b.checkpointCode) || a.unitCode.localeCompare(b.unitCode));
   }, [activeUnitCodeSet, data.rows, openStage]);
 
+  const modalRows = useMemo(() => allModalRows.filter((row) =>
+    (!onlyGaps || row.verification < row.target2026) &&
+    searchText(`${row.checkpointCode} ${row.checkpointText} ${row.element} ${row.mainUnit} ${row.subUnit}`).includes(searchText(checkpointQuery.trim()))
+  ), [allModalRows, checkpointQuery, onlyGaps]);
+
+  const filteredUnits = useMemo(() => groupUnits.filter((unit) => searchText(`${unit.measuredUnit} ${unit.mainUnit} ${unit.code}`).includes(searchText(unitQuery.trim()))), [groupUnits, unitQuery]);
+
   const modalElements = useMemo(() => sortedUnique(modalRows.map((row) => row.element)), [modalRows]);
   const unitByCode = useMemo(() => new Map(data.units.map((unit) => [unit.code, unit])), [data.units]);
 
   function selectGroup(group: string) {
+    cancelSelectionScroll();
+    setIsMinistry(false);
     setActiveGroup(group);
     setSelected(null);
     setOpenStage(null);
+    setUnitQuery("");
+    setSelectionMotion((current) => current + 1);
+  }
+
+  function selectMinistry() {
+    cancelSelectionScroll();
+    setIsMinistry(true);
+    setSelected(null);
+    setOpenStage(null);
+    setUnitQuery("");
     setSelectionMotion((current) => current + 1);
   }
 
   function selectRoot() {
-    setSelected(null);
-    setOpenStage(null);
-    setSelectionMotion((current) => current + 1);
+    selectNode(null);
   }
 
   function selectMain(mainUnit: string, units: OrgUnit[]) {
-    setSelected({
+    selectNode({
       id: `main:${activeGroup}:${mainUnit}`,
       label: mainUnit,
       kind: "main",
       group: activeGroup,
       unitCodes: units.map((unit) => unit.code),
     });
-    setOpenStage(null);
-    setSelectionMotion((current) => current + 1);
   }
 
   function selectUnit(unit: OrgUnit) {
-    setSelected({
+    selectNode({
       id: `unit:${unit.code}`,
       label: unit.measuredUnit,
       kind: "unit",
       group: activeGroup,
       unitCodes: [unit.code],
     });
-    setOpenStage(null);
-    setSelectionMotion((current) => current + 1);
+  }
+
+  function cancelSelectionScroll() {
+    if (selectionScrollFrame.current !== null) cancelAnimationFrame(selectionScrollFrame.current);
+    if (selectionDelayTimer.current !== null) clearTimeout(selectionDelayTimer.current);
+    selectionScrollFrame.current = null;
+    selectionDelayTimer.current = null;
+  }
+
+  function selectNode(node: SelectedNode | null) {
+    cancelSelectionScroll();
+    const applySelection = () => {
+      selectionDelayTimer.current = null;
+      setSelected(node);
+      setOpenStage(null);
+      setSelectionMotion((current) => current + 1);
+    };
+    const revealResults = () => {
+      selectionScrollFrame.current = null;
+      // Briefly hold the previous numbers after the cards come into view.
+      selectionDelayTimer.current = setTimeout(applySelection, 250);
+    };
+    const startY = window.scrollY;
+    const stages = stagesRef.current?.getBoundingClientRect();
+    const desiredY = stages ? startY + stages.top - Math.max(16, (window.innerHeight - stages.height) / 2) : startY;
+    const targetY = Math.max(0, Math.min(desiredY, document.documentElement.scrollHeight - window.innerHeight));
+    if (Math.abs(startY - targetY) <= 1 || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      window.scrollTo({ top: targetY, behavior: "instant" });
+      revealResults();
+      return;
+    }
+    let startedAt: number | null = null;
+    const scroll = (now: number) => {
+      startedAt ??= now;
+      const progress = Math.min(1, (now - startedAt) / 180);
+      window.scrollTo({ top: targetY + (startY - targetY) * Math.pow(1 - progress, 3), behavior: "instant" });
+      if (progress < 1) selectionScrollFrame.current = requestAnimationFrame(scroll);
+      else revealResults();
+    };
+    selectionScrollFrame.current = requestAnimationFrame(scroll);
+  }
+
+  function showStage(stage: string) {
+    setCheckpointQuery("");
+    setOnlyGaps(false);
+    setOpenStage(stage);
   }
 
   return (
     <main className="maturity-dashboard">
-      <header className="topbar maturity-topbar">
-        <div className="brand-logo"><img src="/mngdp-logo.png" alt="برنامج تطوير وزارة الحرس الوطني" /></div>
-        <div className="title-block"><p>لوحة الأداء المؤسسي</p><h1>قياس نضج النموذج التشغيلي</h1></div>
-        <nav className="site-nav" aria-label="التنقل الرئيسي">
-          <a className="active" href="/">لوحة التحليل</a>
-          <a href="/guide">الدليل الإرشادي</a>
-          <a href="/upload">رفع البيانات</a>
-        </nav>
-        <a className="download-link" href={activeVersionId ? `/api/versions/${activeVersionId}/file` : "/قياس_نضج_النموذج_التشغيلي_بالهيكل.xlsx"} download>تنزيل البيانات</a>
-      </header>
-
-      <section className="selection-summary" aria-live="polite">
-        <div><p>النطاق المحدد</p><h2>{activeNode.label}</h2><span>{activeNode.kind === "group" ? `${activeNode.unitCodes.length} وحدة تنظيمية` : activeNode.kind === "main" ? `${activeNode.unitCodes.length} وحدات ضمن الفرع` : unitByCode.get(activeNode.unitCodes[0])?.level || "وحدة تنظيمية"}</span></div>
-        <div className="selection-line" aria-hidden="true" />
-        <p className="selection-help">اختر أي عقدة من الهيكل لتحديث النتائج، ثم اضغط على إحدى المراحل لعرض نقاط التحقق.</p>
+      <AppHeader active="dashboard" action={<a className="button button-outline" href={activeVersionId ? `/api/versions/${activeVersionId}/file` : "/قياس_نضج_النموذج_التشغيلي_بالهيكل.xlsx"} download><Icon name="download" />تنزيل البيانات</a>} />
+      <div className="app-container dashboard-content" id="main-content">
+      <section className="page-heading">
+        <div><p className="eyebrow">لوحة الأداء المؤسسي</p><h1>قياس نضج النموذج التشغيلي</h1><p className="page-description">صورة أوضح للأداء، من مستوى الوزارة إلى تفاصيل كل وحدة.</p></div>
+        <a className="help-link" href="/guide"><Icon name="book" />كيف تقرأ النتائج؟<Icon name="arrow" /></a>
+      </section>
+      {dataUnavailable && <div className="notice warning" role="status"><Icon name="info" /><p>تعذر جلب آخر تحديث. تُعرض آخر بيانات متاحة، وستُعاد المحاولة تلقائيًا.</p></div>}
+      <section className="scope-navigation" aria-label="نطاق القياس">
+        <button aria-label="عرض القياس على مستوى الوزارة" aria-pressed={isMinistry} className={`ministry-overview ${isMinistry ? "active" : ""}`} type="button" onClick={selectMinistry}>
+          <span className="ministry-overview-icon"><Icon name="chart" /></span>
+          <span className="ministry-overview-copy"><strong>مستوى الوزارة</strong><small>المتوسط العام للمجموعات الثلاث</small></span>
+          <span className="ministry-overview-action">{isMinistry ? "المعروض حاليًا" : "عرض ملخص الوزارة"}<Icon name={isMinistry ? "check" : "arrow"} /></span>
+        </button>
+        <div className="scope-groups">
+          <p id="groups-label">المجموعات التابعة للوزارة</p>
+          <div className="group-selector" role="group" aria-labelledby="groups-label">
+            {data.groups.map((group) => <button aria-pressed={!isMinistry && activeGroup === group} className={!isMinistry && activeGroup === group ? "active" : ""} type="button" key={group} onClick={() => selectGroup(group)}>{group}<span>{data.units.filter((unit) => unit.group === group).length}</span></button>)}
+          </div>
+        </div>
+      </section>
+      <section className="selection-summary" id="scope-summary" aria-live="polite">
+        <div className="scope-icon"><Icon name="grid" /></div>
+        <div className="scope-copy"><p>النطاق المحدد {hasFocusedNode && <span> / {activeGroup}</span>}</p><h2>{activeNode.label}</h2></div>
+        <span className="scope-count">{isMinistry ? `${data.groups.length} مجموعات تنظيمية` : `${activeNode.unitCodes.length} وحدة تنظيمية`}</span>
+        {isMinistry ? <p className="ministry-method">متوسط المجموعات الثلاث بالتساوي لكل مرحلة</p> : hasFocusedNode ? <button className="button button-quiet" type="button" onClick={selectRoot}><Icon name="refresh" />عرض المجموعة كاملة</button> : <a className="scope-hint button button-quiet" href="#units">اختر وحدة لاستكشاف التفاصيل<Icon name="arrow" /></a>}
       </section>
 
-      <section className="maturity-stages" aria-label={`درجات النضج لـ ${activeNode.label}`}>
+      <section className="maturity-stages" ref={stagesRef} aria-label={`درجات النضج لـ ${activeNode.label}`}>
         {data.stages.map((stage, index) => {
           const value = stageMetrics[stage] ?? null;
           const target = stageTargets[stage] ?? null;
           const gap = value === null || target === null ? null : target - value;
           const maturity = maturityLabel(value, data.thresholds);
           return (
-            <button
+            <article
               className={`maturity-stage ${stageClasses[index]} ${styles.stageCard}`}
-              type="button"
               key={stage}
-              disabled={!canShowCheckpoints}
-              onClick={() => { if (canShowCheckpoints) setOpenStage(stage); }}
             >
-              <i className={styles.stageUpdatePulse} aria-hidden="true" key={`${stage}-${selectionMotion}`} />
               <div className="maturity-stage-heading">
                 <span>{String(index + 1).padStart(2, "0")}</span>
                 <div>
@@ -404,32 +489,33 @@ export default function Home() {
                   <div className="maturity-stage-target" aria-label={`مستهدف عام 2026 لمرحلة ${stage}: ${target === null ? "لا توجد بيانات" : `${roundedPercentage(target)} بالمئة`}`}>
                     <span>مستهدف 2026</span>
                     <strong>{target === null ? "—" : `${roundedPercentage(target)}%`}</strong>
-                    {gap !== null && <em>{gap > 0.05 ? `فجوة ${roundedPercentage(gap)} نقطة` : gap < -0.05 ? `متجاوز بـ ${roundedPercentage(Math.abs(gap))} نقطة` : "تم تحقيق المستهدف"}</em>}
+                    {gap !== null && <em>{roundedPercentage(gap) > 0 ? `فجوة ${roundedPercentage(gap)} نقطة` : roundedPercentage(gap) < 0 ? `متجاوز بـ ${roundedPercentage(Math.abs(gap))} نقطة` : "تم تحقيق المستهدف"}</em>}
                   </div>
                 </div>
               </div>
               <AnimatedStageScore value={value} stage={stage} updateSequence={selectionMotion} />
               <div className="maturity-stage-foot">
-                <div className="maturity-dots" aria-label={`مستوى النضج: ${maturity}`}>
+                <div className="maturity-dots" data-maturity={maturity} aria-label={`مستوى النضج: ${maturity}`}>
                   {maturityStates.map((state) => <i className={maturity === state ? "active" : ""} key={state}>{state}</i>)}
                 </div>
-                <span className={canShowCheckpoints ? styles.checkpointPrompt : ""}>{canShowCheckpoints ? "انقر لعرض نقاط التحقق ←" : "اختر عقدة فرعية لعرض نقاط التحقق"}</span>
+                {!isMinistry && <button className="stage-details" type="button" disabled={!canShowCheckpoints} onClick={() => showStage(stage)} aria-label={`عرض نقاط تحقق مرحلة ${stage}`}>{canShowCheckpoints ? "نقاط التحقق" : "اختر وحدة لعرض التفاصيل"}<Icon name={canShowCheckpoints ? "arrow" : "info"} /></button>}
               </div>
-            </button>
+            </article>
           );
         })}
       </section>
 
-      <section className={`organization-panel ${activeGroup === "الجهاز العسكري" ? "military-organization" : ""} ${hasFocusedNode ? styles.nodeSelectionActive : ""}`}>
+      {!isMinistry && <section id="units" className={`organization-panel ${activeGroup === "الجهاز العسكري" ? "military-organization" : ""} ${hasFocusedNode ? styles.nodeSelectionActive : ""}`}>
         <div className="organization-head">
-          <div><p>الهيكل التنظيمي</p><h2>اختر المجموعة ثم الوحدة المطلوب تحليلها</h2></div>
-          <div className="organization-tabs" role="tablist" aria-label="المجموعات التنظيمية">
-            {data.groups.map((group) => (
-              <button role="tab" aria-selected={activeGroup === group} className={activeGroup === group ? "active" : ""} type="button" key={group} onClick={() => selectGroup(group)}>{group}</button>
-            ))}
+          <div><h2>استكشف الوحدات التنظيمية</h2><p>اختر وحدة لتحديث مؤشرات النضج في الأعلى.</p></div>
+          <div className="organization-tools">
+            <label className="search-field"><Icon name="search" /><input type="search" aria-label="البحث عن وحدة تنظيمية" placeholder="ابحث باسم الوحدة أو رمزها…" value={unitQuery} onChange={(event) => setUnitQuery(event.target.value)} />{unitQuery && <button type="button" aria-label="مسح البحث" onClick={() => setUnitQuery("")}><Icon name="close" /></button>}</label>
+            <div className="view-toggle" role="group" aria-label="طريقة عرض الوحدات"><button type="button" aria-pressed={viewMode === "chart"} onClick={() => { setViewMode("chart"); setUnitQuery(""); }}><Icon name="grid" />هيكل</button><button type="button" aria-pressed={viewMode === "list"} onClick={() => setViewMode("list")}><Icon name="list" />قائمة</button></div>
           </div>
+        </div>
+        <div className="organization-meta">
+          <span>{unitQuery ? `${filteredUnits.length} نتائج البحث` : `${groupUnits.length} وحدة ضمن ${activeGroup}`}</span>
           <aside className="organization-legend" aria-label="دليل مستويات النضج">
-            <strong className="organization-legend-title">مستوى النضج</strong>
             <div className="organization-legend-items">
               <span className="organization-legend-item initial"><i /><span><strong>أولي</strong><small>حتى {data.thresholds.initialMax}%</small></span></span>
               <span className="organization-legend-item partial"><i /><span><strong>جزئي</strong><small>أكثر من {data.thresholds.initialMax}% إلى {data.thresholds.advancedMinExclusive}%</small></span></span>
@@ -438,7 +524,16 @@ export default function Home() {
           </aside>
         </div>
 
-        <div className="org-chart-scroll">
+        {(unitQuery.trim() || viewMode === "list") ? <div className="unit-list">
+          {filteredUnits.map((unit) => {
+            const maturity = nodeMaturity([unit.code]);
+            const isSelected = activeNode.kind === "unit" && activeNode.unitCodes[0] === unit.code;
+            return <button key={unit.code} className={`unit-list-card ${isSelected ? "selected" : ""}`} type="button" aria-pressed={isSelected} onClick={() => selectUnit(unit)}><span className="unit-list-icon"><Icon name="grid" /></span><span className="unit-list-copy"><small>{unit.code} · {unit.level || "وحدة تنظيمية"}</small><strong>{unit.measuredUnit}</strong><span>{unit.mainUnit !== unit.measuredUnit ? unit.mainUnit : activeGroup}</span></span><span className={`maturity-badge ${maturity === "أولي" ? "initial" : maturity === "جزئي" ? "partial" : "advanced"}`}>{maturity}</span><Icon name={isSelected ? "check" : "arrow"} /></button>;
+          })}
+          {!filteredUnits.length && <div className="empty-state"><Icon name="search" /><h3>لا توجد وحدات مطابقة</h3><p>جرّب اسمًا آخر أو رمز الوحدة ضمن المجموعة المختارة.</p><button type="button" className="button button-outline" onClick={() => setUnitQuery("")}>مسح البحث</button></div>}
+        </div> : <>
+        <div className="chart-hint"><Icon name="info" /><span>اضغط على أي وحدة لتحليلها. يمكنك تمرير الهيكل أفقيًا أو استخدام عرض القائمة.</span></div>
+        <div className="org-chart-scroll" tabIndex={0} role="region" aria-label={`الهيكل التنظيمي لـ ${activeGroup}`}>
           <div className="org-chart">
             <div className="org-root-wrap">
               <OrgNode label={activeGroup} selected={activeNode.id === groupRoot.id} dimmed={hasFocusedNode} root onClick={selectRoot} />
@@ -500,16 +595,18 @@ export default function Home() {
               </div>
             )}
           </div>
-        </div>
-      </section>
+        </div></>}
+      </section>}
+      <footer className="app-footer"><span>قياس نضج النموذج التشغيلي</span><span>تُعرض النسب مقربة لأقرب عدد صحيح · مستهدفات 2026</span></footer>
+      </div>
 
       {openStage && (
-        <div className="checkpoint-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setOpenStage(null); }}>
-          <section className={`checkpoint-modal ${stageClasses[Math.max(0, data.stages.indexOf(openStage))]}`} role="dialog" aria-modal="true" aria-labelledby="checkpoint-title">
+        <Dialog className={`checkpoint-modal ${stageClasses[Math.max(0, data.stages.indexOf(openStage))]}`} labelId="checkpoint-title" onClose={() => setOpenStage(null)}>
             <header className="checkpoint-head">
-              <div><p>{activeNode.label}</p><h2 id="checkpoint-title">نقاط تحقق مرحلة {openStage}</h2><span>{modalRows.length} قياسًا ضمن {modalElements.length} عناصر</span></div>
-              <button type="button" aria-label="إغلاق" onClick={() => setOpenStage(null)}>×</button>
+              <div><p>{activeNode.label}</p><h2 id="checkpoint-title">نقاط تحقق مرحلة {openStage}</h2><span>{allModalRows.length} قياسًا ضمن النطاق المحدد</span></div>
+              <button className="icon-button" type="button" aria-label="إغلاق" onClick={() => setOpenStage(null)}><Icon name="close" /></button>
             </header>
+            <div className="checkpoint-tools"><label className="search-field"><Icon name="search" /><input type="search" aria-label="البحث في نقاط التحقق" placeholder="ابحث في نقاط التحقق…" value={checkpointQuery} onChange={(event) => setCheckpointQuery(event.target.value)} /></label><button className={`button ${onlyGaps ? "button-primary" : "button-outline"}`} type="button" aria-pressed={onlyGaps} onClick={() => setOnlyGaps(!onlyGaps)}>النقاط دون المستهدف</button><span aria-live="polite">{modalRows.length} نتيجة</span></div>
             <div className="checkpoint-content">
               {modalElements.map((element) => {
                 const elementRows = modalRows.filter((row) => row.element === element);
@@ -535,10 +632,9 @@ export default function Home() {
                   </section>
                 );
               })}
-              {!modalRows.length && <div className="checkpoint-empty">لا توجد نقاط تحقق ضمن هذا النطاق.</div>}
+              {!modalRows.length && <div className="empty-state"><Icon name="search" /><h3>لا توجد نقاط تحقق مطابقة</h3><p>جرّب تغيير البحث أو عرض جميع النقاط.</p><button type="button" className="button button-outline" onClick={() => { setOnlyGaps(false); setCheckpointQuery(""); }}>عرض جميع النقاط</button></div>}
             </div>
-          </section>
-        </div>
+        </Dialog>
       )}
     </main>
   );

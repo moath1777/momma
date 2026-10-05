@@ -1,11 +1,14 @@
 "use client";
+/* Native links match the navigation used by the Vinext app. */
+/* eslint-disable @next/next/no-html-link-for-pages */
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import AppHeader from "../components/app-header";
+import Icon from "../components/icon";
+import Dialog from "../components/dialog";
 import {
   GROUP_SHEETS,
   LOCAL_SYNC_FINGERPRINT_KEY,
-  LOCAL_WORKBOOK_NAME,
-  LOCAL_WORKBOOK_URL,
   REQUIRED_SHEETS,
   fileFingerprint,
   parseWorkbook,
@@ -24,13 +27,22 @@ export default function UploadPage() {
   const [error, setError] = useState("");
   const [linkedWorkbook, setLinkedWorkbook] = useState<LocalFileHandle | null>(null);
   const [syncState, setSyncState] = useState("غير مرتبط");
+  const [loadingVersions, setLoadingVersions] = useState(true);
+  const [versionsFailed, setVersionsFailed] = useState(false);
+  const [dragging, setDragging] = useState(false);
+  const [lastFile, setLastFile] = useState("");
+  const [pendingDelete, setPendingDelete] = useState<Version | null>(null);
   const lastSyncedFingerprint = useRef<string | null>(null);
   const syncing = useRef(false);
 
   const loadVersions = useCallback(async () => {
-    const response = await fetch("/api/versions", { cache: "no-store" });
-    if (!response.ok) throw new Error("تعذر تحميل الإصدارات.");
-    setVersions((await response.json()).versions);
+    try {
+      const response = await fetch("/api/versions", { cache: "no-store" });
+      if (!response.ok) throw new Error("تعذر تحميل الإصدارات. حاول تحديث الصفحة.");
+      setVersions((await response.json()).versions);
+      setVersionsFailed(false);
+    } catch (reason) { setVersionsFailed(true); throw reason; }
+    finally { setLoadingVersions(false); }
   }, []);
 
   const syncWorkbook = useCallback(async (file: File, automatic = false) => {
@@ -39,6 +51,8 @@ export default function UploadPage() {
     setBusy(true); setError(""); setMessage(automatic ? "تم رصد تعديل في ملف Excel..." : "جارٍ فحص الملف...");
     try {
       if (!file.name.toLowerCase().endsWith(".xlsx")) throw new Error("الملف يجب أن يكون بصيغة XLSX.");
+      if (file.size > 15 * 1024 * 1024) throw new Error("حجم الملف يتجاوز 15 ميجابايت. اختر ملفًا أصغر.");
+      setLastFile(file.name);
       const data = await parseWorkbook(file);
       setMessage(`تم التحقق من ${data.rows.length} سجل. جارٍ إنشاء الإصدار...`);
       await uploadWorkbookVersion(file, data);
@@ -65,11 +79,11 @@ export default function UploadPage() {
       await saveLinkedWorkbook(handle);
       setLinkedWorkbook(handle); setSyncState("جارٍ التحقق والمزامنة الأولى...");
       await syncWorkbook(await handle.getFile());
-    } catch (reason) { setError(reason instanceof Error ? reason.message : "تعذر ربط الملف."); }
+    } catch (reason) { if (reason instanceof DOMException && reason.name === "AbortError") return; setError(reason instanceof Error ? reason.message : "تعذر ربط الملف."); }
   }
 
   useEffect(() => {
-    loadVersions().catch((reason) => setError(reason.message));
+    const frame = window.requestAnimationFrame(() => { void loadVersions().catch((reason) => setError(reason.message)); });
     readLinkedWorkbook().then(async (handle) => {
       if (!handle) return;
       const permission = await handle.queryPermission?.({ mode: "read" });
@@ -80,6 +94,7 @@ export default function UploadPage() {
       if (lastSyncedFingerprint.current !== fileFingerprint(file)) await syncWorkbook(file, true);
       else setSyncState(`متصل — آخر ملف تمت مزامنته`);
     }).catch(() => setSyncState("غير مرتبط"));
+    return () => window.cancelAnimationFrame(frame);
   }, [loadVersions, syncWorkbook]);
 
   useEffect(() => {
@@ -105,26 +120,34 @@ export default function UploadPage() {
 
   return (
     <main className="content-page">
-      <header className="content-topbar">
-        <a className="compact-brand" href="/"><img src="/mngdp-logo.png" alt="برنامج تطوير وزارة الحرس الوطني" /></a>
-        <nav className="site-nav" aria-label="التنقل الرئيسي"><a href="/">لوحة التحليل</a><a href="/guide">الدليل الإرشادي</a><a className="active" href="/upload">رفع البيانات</a></nav>
-      </header>
-
-      <section className="page-hero upload-hero"><p>إدارة مصدر البيانات</p><h1>رفع بيانات الهيكل التنظيمي</h1><span>ارفع ملف القياس الجديد؛ يُفحص على مستوى الوحدات ونقاط التحقق، ثم تُحدّث المخططات التنظيمية ودرجات المراحل مباشرة.</span></section>
-
+      <AppHeader active="upload" action={<a className="button button-outline" href="/"><Icon name="arrow" />العودة إلى التحليل</a>} />
+      <div className="app-container" id="main-content">
+      <section className="page-heading"><div><p className="eyebrow">إدارة مصدر البيانات</p><h1>بيانات أدق. قرارات أوضح.</h1><p className="page-description">حدّث ملف القياس، تابع المزامنة، واستعرض إصدارات بياناتك من مكان واحد.</p></div><a className="help-link" href="/guide#data"><Icon name="book" />دليل تحديث البيانات<Icon name="arrow" /></a></section>
+      {message && <div className="notice" role="status" style={{ marginTop: 20 }}><Icon name={busy ? "refresh" : "check"} /><p>{message}</p></div>}
+      {error && <div className="notice error" role="alert" style={{ marginTop: 20 }}><Icon name="info" /><p>{error}</p><button type="button" aria-label="إغلاق رسالة الخطأ" onClick={() => setError("")}><Icon name="close" /></button></div>}
       <section className="upload-layout">
         <div className="upload-column">
-          <section className={`local-sync-card ${linkedWorkbook ? "connected" : ""}`} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, padding: "14px 16px", border: `1px solid ${linkedWorkbook ? "#8ab89b" : "#d8e5de"}`, borderRadius: 16, background: linkedWorkbook ? "linear-gradient(135deg, #f4fbf6, #e4f3e9)" : "linear-gradient(135deg, #f8fcf9, #edf6f0)", boxShadow: "0 9px 24px rgba(23,52,41,.04)" }}>
-            <div style={{ minWidth: 0, display: "grid", gap: 3 }}><p style={{ margin: 0, color: "var(--green)", fontSize: 9, fontWeight: 900 }}>مزامنة الملف المحلي</p><strong style={{ overflow: "hidden", maxWidth: 255, color: "var(--ink)", fontSize: 11, textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{linkedWorkbook ? linkedWorkbook.name : "اربط ملف Excel لتحديث الموقع تلقائيًا"}</strong><small style={{ color: "var(--muted)", fontSize: 8 }}>{syncState}</small></div>
-            <button type="button" disabled={busy} onClick={linkWorkbook} style={{ flex: "0 0 auto", border: 0, borderRadius: 9, padding: "9px 11px", color: "white", background: "var(--green)", fontSize: 9, fontWeight: 900, cursor: busy ? "wait" : "pointer", opacity: busy ? .55 : 1 }}>{linkedWorkbook ? "تغيير الملف" : "ربط الملف"}</button>
+          <section className="panel" aria-busy={busy}>
+            <div className="panel-title"><span><Icon name="upload" /></span><div><h2>رفع ملف القياس</h2><p>يُفعّل الإصدار الجديد بعد التحقق من البيانات.</p></div></div>
+            <label className={`upload-dropzone ${busy ? "disabled" : ""} ${dragging ? "dragging" : ""}`} onDragOver={(event) => { event.preventDefault(); if (!busy) setDragging(true); }} onDragLeave={(event) => { if (!event.currentTarget.contains(event.relatedTarget as Node)) setDragging(false); }} onDrop={(event) => {
+              event.preventDefault(); setDragging(false);
+              if (busy) return;
+              if (event.dataTransfer.files.length !== 1) { setError("اختر ملف Excel واحدًا في كل مرة."); return; }
+              void upload(event.dataTransfer.files[0]);
+            }}>
+              <input type="file" aria-label="اختر ملف Excel" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" disabled={busy} onChange={(event) => { void upload(event.target.files?.[0]); event.target.value = ""; }} />
+              <span className="upload-icon"><Icon name="file" /></span><strong>{busy ? "جارٍ التحقق من بياناتك…" : dragging ? "أفلت الملف هنا" : "اسحب ملف Excel إلى هنا"}</strong><small>صيغة XLSX · بحد أقصى 15 ميجابايت</small><span className="button button-primary">{busy ? "جارٍ المعالجة…" : "اختر ملف Excel"}<Icon name="upload" /></span>
+              {busy && <span className="upload-progress" aria-hidden="true" />}
+            </label>
+            {lastFile && <p className="upload-file-info">آخر ملف تم اختياره: {lastFile}</p>}
+            <a className="upload-guide-link" href="/guide#data"><Icon name="book" />تعرّف على خطوات تجهيز الملف<Icon name="arrow" /></a>
           </section>
-          <label className={`upload-dropzone ${busy ? "disabled" : ""}`}>
-            <input type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" disabled={busy} onChange={(event) => upload(event.target.files?.[0])} />
-            <span className="upload-icon">↑</span><strong>{busy ? "جارٍ المعالجة..." : "اختر ملف Excel"}</strong><small>أو اسحب الملف هنا — الحد الأقصى 15 MB</small>
-          </label>
-          {message && <p className="system-message success">{message}</p>}{error && <p className="system-message error">{error}</p>}
-          <article className="requirements-card">
-            <h2>شروط ملف Excel</h2>
+          <section className="local-sync-card panel">
+            <span className="unit-list-icon"><Icon name="link" /></span><div className="sync-copy"><h2>مزامنة تلقائية مع Excel</h2><p>اربط ملفك مرة واحدة، واحفظ تعديلاته لتحديث اللوحة ما دام الموقع مفتوحًا.</p><strong>{linkedWorkbook ? linkedWorkbook.name : "لم يتم ربط ملف محلي"}</strong><span className={`sync-state ${linkedWorkbook && syncState.startsWith("متصل") ? "connected" : ""}`}><i />{syncState}</span></div>
+            <button className="button button-outline" type="button" disabled={busy} onClick={linkWorkbook}>{linkedWorkbook ? "تغيير الملف" : "ربط الملف"}</button>
+          </section>
+          <details className="requirements-card panel">
+            <summary>شروط ملف Excel<Icon name="chevron" /></summary>
             <ul>
               <li>الصيغة المطلوبة: <b>XLSX</b>، والحجم لا يتجاوز 15 MB.</li>
               <li>الشيتات المطلوبة بالأسماء نفسها: <b>{REQUIRED_SHEETS.join("، ")}</b>.</li>
@@ -134,26 +157,31 @@ export default function UploadPage() {
               <li>نسب الإنجاز الحالية والمستهدفة يجب أن تكون أرقامًا بين 0 و100، ويرتبط كل سجل بكود وحدة موجود في «قائمة الوحدات».</li>
               <li>يمكن اختلاف ترتيب الأعمدة، لكن يجب الحفاظ على أسماء الأعمدة المطلوبة كما هي.</li>
             </ul>
-            <p>للتحديث التلقائي: اضغط «ربط الملف» مرة واحدة واختر ملف Excel الحالي. ما دام الموقع مفتوحًا على لوحة التحليل أو صفحة رفع البيانات، يلتقط الحفظ الجديد ويحدّث اللوحة تلقائيًا. الملف الافتراضي داخل المشروع هو <b>{LOCAL_WORKBOOK_NAME}</b>.</p>
-          </article>
+          </details>
         </div>
 
-        <section className="versions-panel">
-          <div className="versions-head"><div><p>سجل التحديثات</p><h2>إصدارات البيانات</h2></div><span>{versions.length} إصدار</span></div>
+        <section className="versions-panel panel" aria-busy={loadingVersions}>
+          <div className="versions-head"><div><h2>إصدارات البيانات</h2><p>الملف الحالي وسجل التحديثات السابقة.</p></div><span>{versions.length} إصدار</span></div>
           <div className="versions-list">
             {versions.map((version) => (
               <article className={`version-card ${version.active ? "current" : ""}`} key={version.id}>
-                <div className="version-main"><span className="file-badge">XLSX</span><div><a href={version.active ? LOCAL_WORKBOOK_URL : `/api/versions/${version.id}/file`} target={version.active ? undefined : "_blank"} rel={version.active ? undefined : "noreferrer"} title={version.active ? "فتح الملف المحلي المرتبط في Excel" : "فتح ملف هذا الإصدار"}>{version.active ? linkedWorkbook?.name || version.filename || LOCAL_WORKBOOK_NAME : version.filename}</a><small>{new Date(version.createdAt).toLocaleString("ar-SA")} · {version.rowCount} نقطة تحقق · {(version.sizeBytes / 1024).toFixed(0)} KB</small><em>{version.stageNames.join(" · ")}</em></div></div>
+                <div className="version-main"><span className="file-badge">XLSX</span><div><a href={`/api/versions/${version.id}/file`} download>{version.filename}</a><small>{new Date(version.createdAt).toLocaleString("ar-SA", { dateStyle: "medium", timeStyle: "short" })} · {version.rowCount} نقطة تحقق · {Math.round(version.sizeBytes / 1024)} KB</small><em>{version.stageNames.join(" · ")}</em></div></div>
                 <div className="version-actions">
-                  {version.active ? <b>الإصدار الحالي</b> : <button disabled={busy} onClick={() => mutate(`/api/versions/${version.id}/activate`, "POST")}>استرجاع وتفعيل</button>}
-                  {!version.active && <button className="danger" disabled={busy} onClick={() => mutate(`/api/versions/${version.id}`, "DELETE")}>حذف</button>}
+                  {version.active ? <b><Icon name="check" />الإصدار الحالي</b> : <button className="button button-outline" disabled={busy} onClick={() => mutate(`/api/versions/${version.id}/activate`, "POST")}><Icon name="refresh" />استرجاع وتفعيل</button>}
+                  <a className="button button-quiet" href={`/api/versions/${version.id}/file`} download><Icon name="download" />تنزيل</a>
+                  {!version.active && <button className="button button-quiet danger" disabled={busy} onClick={() => setPendingDelete(version)} aria-label={`حذف إصدار ${version.filename}`}><Icon name="trash" />حذف</button>}
                 </div>
               </article>
             ))}
-            {!versions.length && <div className="empty-versions">لا توجد إصدارات مرفوعة بعد. تستخدم اللوحة البيانات الأساسية الحالية.</div>}
+            {loadingVersions && <div className="loading-versions" role="status" aria-label="جارٍ تحميل الإصدارات"><span /><span /></div>}
+            {!loadingVersions && !versions.length && !versionsFailed && <div className="empty-state"><Icon name="file" /><h3>إصدارك الأول يبدأ هنا</h3><p>ارفع ملف القياس ليظهر في سجل الإصدارات. تستخدم اللوحة الآن البيانات الأساسية.</p></div>}
+            {!loadingVersions && versionsFailed && <div className="empty-state"><Icon name="info" /><h3>تعذر تحميل سجل الإصدارات</h3><p>حاول مرة أخرى للاطلاع على آخر إصدارات البيانات.</p><button className="button button-outline" type="button" onClick={() => { setLoadingVersions(true); void loadVersions().catch((reason) => setError(reason.message)); }}><Icon name="refresh" />إعادة المحاولة</button></div>}
           </div>
         </section>
       </section>
+      <footer className="app-footer" style={{ marginTop: 32 }}><span>قياس نضج النموذج التشغيلي</span><span>يتحقق الموقع من البيانات قبل تفعيل أي إصدار</span></footer>
+      </div>
+      {pendingDelete && <Dialog className="confirm-dialog" labelId="delete-title" descriptionId="delete-description" onClose={() => setPendingDelete(null)}><Icon name="trash" /><h2 id="delete-title">حذف هذا الإصدار؟</h2><p id="delete-description">سيُحذف ملف «{pendingDelete.filename}» من سجل الإصدارات. لن تتمكن من استرجاعه بعد الحذف.</p><div className="confirm-actions"><button className="button button-outline" type="button" onClick={() => setPendingDelete(null)}>إلغاء</button><button className="button button-danger" type="button" onClick={() => { const id = pendingDelete.id; setPendingDelete(null); void mutate(`/api/versions/${id}`, "DELETE"); }}>حذف الإصدار</button></div></Dialog>}
     </main>
   );
 }
