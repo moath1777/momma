@@ -10,7 +10,7 @@ export function ministryStageAverages(data: Pick<ParsedData, "groups" | "stages"
   return Object.fromEntries(data.stages.map((stage) => {
     const groupScores = groupCodes.map((codes) => data.scores.filter((score) => codes.has(score.unitCode) && score.stage === stage));
     const equalGroupMean = (field: "value" | "target2026") => {
-      const values = groupScores.map((scores) => mean(scores.map((score) => score[field]).filter(Number.isFinite)));
+      const values = groupScores.map((scores) => mean(scores.map((score) => score[field]).filter((value): value is number => typeof value === "number" && Number.isFinite(value))));
       // A ministry result requires a result from every group, with equal weight before rounding.
       return values.length && values.every((value): value is number => value !== null) ? mean(values) : null;
     };

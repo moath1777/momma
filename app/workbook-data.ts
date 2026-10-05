@@ -44,8 +44,8 @@ export type StageScore = {
   mainUnit: string;
   subUnit: string;
   stage: string;
-  value: number;
-  target2026: number;
+  value: number | null;
+  target2026: number | null;
   classification: string;
 };
 
@@ -59,8 +59,8 @@ export type WorkbookRow = {
   element: string;
   checkpointCode: string;
   checkpointText: string;
-  verification: number;
-  target2026: number;
+  verification: number | null;
+  target2026: number | null;
   status: string;
   notes: string;
   provider: string;
@@ -75,6 +75,26 @@ export type ParsedData = {
   groups: string[];
   thresholds: { initialMax: number; advancedMinExclusive: number };
 };
+
+export function checkpointStageAverage(rows: WorkbookRow[], field: "verification" | "target2026"): number | null {
+  const applicable = rows.filter((row): row is WorkbookRow & { verification: number; target2026: number } => row.verification !== null && row.target2026 !== null);
+  if (!applicable.length) return null;
+  const elements = new Map<string, typeof applicable>();
+  for (const row of applicable) {
+    const points = elements.get(row.element) ?? [];
+    points.push(row);
+    elements.set(row.element, points);
+  }
+  const summaries = [...elements.values()].map((points) => ({
+    value: points.reduce((sum, row) => sum + row[field], 0) / points.length,
+    weight: points[0].weight,
+  }));
+  if (summaries.every((element) => typeof element.weight === "number" && Number.isFinite(element.weight) && element.weight > 0)) {
+    // Entirely inapplicable elements have no weight in the denominator.
+    return summaries.reduce((sum, element) => sum + element.value * element.weight!, 0) / summaries.reduce((sum, element) => sum + element.weight!, 0);
+  }
+  return applicable.reduce((sum, row) => sum + row[field], 0) / applicable.length;
+}
 
 export type LocalFileHandle = {
   kind: "file";
@@ -136,6 +156,10 @@ function numberValue(value: unknown, sheet: string, rowNumber: number, column: s
   return number;
 }
 
+function isNotApplicable(value: unknown) {
+  return text(value).toUpperCase() === "NA";
+}
+
 function readSheet(workbook: XLSX.WorkBook, name: string) {
   const matrix = XLSX.utils.sheet_to_json<Array<string | number | boolean>>(workbook.Sheets[name], {
     header: 1,
@@ -194,38 +218,20 @@ export function parseWorkbook(file: File): Promise<ParsedData> {
     if (unitCodes.size !== units.length) throw new Error("توجد أكواد وحدات مكررة في شيت «قائمة الوحدات».");
 
     const resultsSheet = readSheet(workbook, "النتائج");
-    const scores = resultsSheet.rows
-      .filter((row) => text(cell(row, resultsSheet.indexes, "كود الوحدة")))
-      .map((row, index) => {
-        const value = numberValue(cell(row, resultsSheet.indexes, "درجة المرحلة"), "النتائج", index + 2, "درجة المرحلة");
-        const target2026 = numberValue(cell(row, resultsSheet.indexes, "درجة المرحلة المستهدفة لعام 2026"), "النتائج", index + 2, "درجة المرحلة المستهدفة لعام 2026");
-        if (value < 0 || value > 100) throw new Error(`درجة المرحلة خارج النطاق في شيت «النتائج»، الصف ${index + 2}.`);
-        if (target2026 < 0 || target2026 > 100) throw new Error(`مستهدف 2026 خارج النطاق في شيت «النتائج»، الصف ${index + 2}.`);
-        return {
-          unitCode: text(cell(row, resultsSheet.indexes, "كود الوحدة")),
-          group: text(cell(row, resultsSheet.indexes, "المجموعة")),
-          mainUnit: text(cell(row, resultsSheet.indexes, "الوحدة التنظيمية الرئيسية")),
-          subUnit: text(cell(row, resultsSheet.indexes, "الوحدة التنظيمية الفرعية")),
-          stage: text(cell(row, resultsSheet.indexes, "المرحلة")),
-          value,
-          target2026,
-          classification: text(cell(row, resultsSheet.indexes, "التصنيف")),
-        };
-      });
-    if (!scores.length) throw new Error("شيت «النتائج» لا يحتوي على نتائج.");
-    if (scores.some((score) => !unitCodes.has(score.unitCode))) throw new Error("توجد نتائج مرتبطة بكود وحدة غير موجود في «قائمة الوحدات».");
-
     const referenceWeights = readReferenceWeights(workbook);
     const rows: WorkbookRow[] = [];
     for (const sheetName of GROUP_SHEETS) {
       const input = readSheet(workbook, sheetName);
       input.rows
-        .filter((row) => text(cell(row, input.indexes, "معرف الصف")))
         .forEach((row, index) => {
-          const verification = numberValue(cell(row, input.indexes, "نسبة إنجاز النقطة %"), sheetName, index + 2, "نسبة إنجاز النقطة %");
-          const target2026 = numberValue(cell(row, input.indexes, "نسبة إنجاز النقطة المستهدفة لعام 2026 %"), sheetName, index + 2, "نسبة إنجاز النقطة المستهدفة لعام 2026 %");
-          if (verification < 0 || verification > 100) throw new Error(`نسبة إنجاز النقطة خارج النطاق في شيت «${sheetName}»، الصف ${index + 2}.`);
-          if (target2026 < 0 || target2026 > 100) throw new Error(`مستهدف 2026 خارج النطاق في شيت «${sheetName}»، الصف ${index + 2}.`);
+          if (!text(cell(row, input.indexes, "معرف الصف"))) return;
+          const rawVerification = cell(row, input.indexes, "نسبة إنجاز النقطة %");
+          const rawTarget = cell(row, input.indexes, "نسبة إنجاز النقطة المستهدفة لعام 2026 %");
+          const notApplicable = isNotApplicable(rawVerification) || isNotApplicable(rawTarget);
+          const verification = notApplicable ? null : numberValue(rawVerification, sheetName, index + 2, "نسبة إنجاز النقطة %");
+          const target2026 = notApplicable ? null : numberValue(rawTarget, sheetName, index + 2, "نسبة إنجاز النقطة المستهدفة لعام 2026 %");
+          if (verification !== null && (verification < 0 || verification > 100)) throw new Error(`نسبة إنجاز النقطة خارج النطاق في شيت «${sheetName}»، الصف ${index + 2}.`);
+          if (target2026 !== null && (target2026 < 0 || target2026 > 100)) throw new Error(`مستهدف 2026 خارج النطاق في شيت «${sheetName}»، الصف ${index + 2}.`);
           const unitCode = text(cell(row, input.indexes, "كود الوحدة"));
           if (!unitCodes.has(unitCode)) throw new Error(`كود الوحدة «${unitCode}» في شيت «${sheetName}» غير موجود في «قائمة الوحدات».`);
           rows.push({
@@ -240,7 +246,7 @@ export function parseWorkbook(file: File): Promise<ParsedData> {
             checkpointText: text(cell(row, input.indexes, "نص نقطة التحقق")),
             verification,
             target2026,
-            status: text(cell(row, input.indexes, "حالة النقطة")),
+            status: notApplicable ? "لا يقاس (NA)" : text(cell(row, input.indexes, "حالة النقطة")),
             notes: text(cell(row, input.indexes, "ملاحظات النقطة")),
             provider: text(cell(row, input.indexes, "الجهة المزودة للمعلومة")),
             weight: referenceWeights.get(weightKey(text(cell(row, input.indexes, "المرحلة")), text(cell(row, input.indexes, "العنصر")))),
@@ -248,6 +254,30 @@ export function parseWorkbook(file: File): Promise<ParsedData> {
         });
     }
     if (!rows.length) throw new Error("أوراق الإدخال الثلاث لا تحتوي على نقاط تحقق.");
+
+    const scores: StageScore[] = resultsSheet.rows.flatMap((row, index) => {
+      const unitCode = text(cell(row, resultsSheet.indexes, "كود الوحدة"));
+      if (!unitCode) return [];
+      const stage = text(cell(row, resultsSheet.indexes, "المرحلة"));
+      const stageRows = rows.filter((point) => point.unitCode === unitCode && point.stage === stage);
+      const hasNotApplicable = stageRows.some((point) => point.verification === null);
+      const value = hasNotApplicable ? checkpointStageAverage(stageRows, "verification") : numberValue(cell(row, resultsSheet.indexes, "درجة المرحلة"), "النتائج", index + 2, "درجة المرحلة");
+      const target2026 = hasNotApplicable ? checkpointStageAverage(stageRows, "target2026") : numberValue(cell(row, resultsSheet.indexes, "درجة المرحلة المستهدفة لعام 2026"), "النتائج", index + 2, "درجة المرحلة المستهدفة لعام 2026");
+      if (value !== null && (value < 0 || value > 100)) throw new Error(`درجة المرحلة خارج النطاق في شيت «النتائج»، الصف ${index + 2}.`);
+      if (target2026 !== null && (target2026 < 0 || target2026 > 100)) throw new Error(`مستهدف 2026 خارج النطاق في شيت «النتائج»، الصف ${index + 2}.`);
+      return [{
+        unitCode,
+        group: text(cell(row, resultsSheet.indexes, "المجموعة")),
+        mainUnit: text(cell(row, resultsSheet.indexes, "الوحدة التنظيمية الرئيسية")),
+        subUnit: text(cell(row, resultsSheet.indexes, "الوحدة التنظيمية الفرعية")),
+        stage,
+        value,
+        target2026,
+        classification: hasNotApplicable ? (value === null ? "لا يقاس (NA)" : value > 70 ? "متقدم" : value <= 30 ? "أولي" : "جزئي") : text(cell(row, resultsSheet.indexes, "التصنيف")),
+      }];
+    });
+    if (!scores.length) throw new Error("شيت «النتائج» لا يحتوي على نتائج.");
+    if (scores.some((score) => !unitCodes.has(score.unitCode))) throw new Error("توجد نتائج مرتبطة بكود وحدة غير موجود في «قائمة الوحدات».");
 
     const stages = [...new Set(scores.map((score) => score.stage).filter(Boolean))];
     if (stages.length !== 3) throw new Error(`يجب أن تحتوي النتائج على 3 مراحل بالضبط؛ الموجود ${stages.length}.`);

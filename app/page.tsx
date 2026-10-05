@@ -40,12 +40,12 @@ function normalizeData(payload: Partial<DataPayload>): DataPayload | null {
   return {
     rows: payload.rows.map((row) => ({
       ...row,
-      target2026: Number.isFinite(Number(row.target2026)) ? Number(row.target2026) : row.verification,
+      target2026: row.verification === null || row.target2026 === null ? null : Number.isFinite(Number(row.target2026)) ? Number(row.target2026) : row.verification,
     })),
     units: payload.units,
     scores: payload.scores.map((score) => ({
       ...score,
-      target2026: Number.isFinite(Number(score.target2026)) ? Number(score.target2026) : score.value,
+      target2026: score.value === null || score.target2026 === null ? null : Number.isFinite(Number(score.target2026)) ? Number(score.target2026) : score.value,
     })),
     stages: payload.stages,
     groups: payload.groups,
@@ -53,9 +53,10 @@ function normalizeData(payload: Partial<DataPayload>): DataPayload | null {
   };
 }
 
-function average(values: number[]) {
-  if (!values.length) return null;
-  return values.reduce((sum, value) => sum + value, 0) / values.length;
+function average(values: (number | null)[]) {
+  const measured = values.filter((value): value is number => typeof value === "number" && Number.isFinite(value));
+  if (!measured.length) return null;
+  return measured.reduce((sum, value) => sum + value, 0) / measured.length;
 }
 
 function roundedPercentage(value: number) {
@@ -179,7 +180,6 @@ export default function Home() {
   const [selected, setSelected] = useState<SelectedNode | null>(null);
   const [openStage, setOpenStage] = useState<string | null>(null);
   const [selectionMotion, setSelectionMotion] = useState(0);
-  const [unitQuery, setUnitQuery] = useState("");
   const [viewMode, setViewMode] = useState<"chart" | "list">("chart");
   const [checkpointQuery, setCheckpointQuery] = useState("");
   const [onlyGaps, setOnlyGaps] = useState(false);
@@ -230,6 +230,7 @@ export default function Home() {
     const weightedRows = data.rows
       .filter((row) => unitCodeSet.has(row.unitCode))
       .flatMap((row) => {
+        if (row.verification === null) return [];
         const weight = Number((row as WorkbookRow & { weight?: unknown }).weight);
         return Number.isFinite(weight) && weight > 0 ? [{ value: row.verification, weight }] : [];
       });
@@ -343,11 +344,9 @@ export default function Home() {
   }, [activeUnitCodeSet, data.rows, openStage]);
 
   const modalRows = useMemo(() => allModalRows.filter((row) =>
-    (!onlyGaps || row.verification < row.target2026) &&
+    (!onlyGaps || (row.verification !== null && row.target2026 !== null && row.verification < row.target2026)) &&
     searchText(`${row.checkpointCode} ${row.checkpointText} ${row.element} ${row.mainUnit} ${row.subUnit}`).includes(searchText(checkpointQuery.trim()))
   ), [allModalRows, checkpointQuery, onlyGaps]);
-
-  const filteredUnits = useMemo(() => groupUnits.filter((unit) => searchText(`${unit.measuredUnit} ${unit.mainUnit} ${unit.code}`).includes(searchText(unitQuery.trim()))), [groupUnits, unitQuery]);
 
   const modalElements = useMemo(() => sortedUnique(modalRows.map((row) => row.element)), [modalRows]);
   const unitByCode = useMemo(() => new Map(data.units.map((unit) => [unit.code, unit])), [data.units]);
@@ -358,7 +357,6 @@ export default function Home() {
     setActiveGroup(group);
     setSelected(null);
     setOpenStage(null);
-    setUnitQuery("");
     setSelectionMotion((current) => current + 1);
   }
 
@@ -367,7 +365,6 @@ export default function Home() {
     setIsMinistry(true);
     setSelected(null);
     setOpenStage(null);
-    setUnitQuery("");
     setSelectionMotion((current) => current + 1);
   }
 
@@ -509,12 +506,11 @@ export default function Home() {
         <div className="organization-head">
           <div><h2>استكشف الوحدات التنظيمية</h2><p>اختر وحدة لتحديث مؤشرات النضج في الأعلى.</p></div>
           <div className="organization-tools">
-            <label className="search-field"><Icon name="search" /><input type="search" aria-label="البحث عن وحدة تنظيمية" placeholder="ابحث باسم الوحدة أو رمزها…" value={unitQuery} onChange={(event) => setUnitQuery(event.target.value)} />{unitQuery && <button type="button" aria-label="مسح البحث" onClick={() => setUnitQuery("")}><Icon name="close" /></button>}</label>
-            <div className="view-toggle" role="group" aria-label="طريقة عرض الوحدات"><button type="button" aria-pressed={viewMode === "chart"} onClick={() => { setViewMode("chart"); setUnitQuery(""); }}><Icon name="grid" />هيكل</button><button type="button" aria-pressed={viewMode === "list"} onClick={() => setViewMode("list")}><Icon name="list" />قائمة</button></div>
+            <div className="view-toggle" role="group" aria-label="طريقة عرض الوحدات"><button type="button" aria-pressed={viewMode === "chart"} onClick={() => setViewMode("chart")}><Icon name="grid" />هيكل</button><button type="button" aria-pressed={viewMode === "list"} onClick={() => setViewMode("list")}><Icon name="list" />قائمة</button></div>
           </div>
         </div>
         <div className="organization-meta">
-          <span>{unitQuery ? `${filteredUnits.length} نتائج البحث` : `${groupUnits.length} وحدة ضمن ${activeGroup}`}</span>
+          <span>{groupUnits.length} وحدة ضمن {activeGroup}</span>
           <aside className="organization-legend" aria-label="دليل مستويات النضج">
             <div className="organization-legend-items">
               <span className="organization-legend-item initial"><i /><span><strong>أولي</strong><small>حتى {data.thresholds.initialMax}%</small></span></span>
@@ -524,13 +520,13 @@ export default function Home() {
           </aside>
         </div>
 
-        {(unitQuery.trim() || viewMode === "list") ? <div className="unit-list">
-          {filteredUnits.map((unit) => {
+        {viewMode === "list" ? <div className="unit-list">
+          {groupUnits.map((unit) => {
             const maturity = nodeMaturity([unit.code]);
             const isSelected = activeNode.kind === "unit" && activeNode.unitCodes[0] === unit.code;
             return <button key={unit.code} className={`unit-list-card ${isSelected ? "selected" : ""}`} type="button" aria-pressed={isSelected} onClick={() => selectUnit(unit)}><span className="unit-list-icon"><Icon name="grid" /></span><span className="unit-list-copy"><small>{unit.code} · {unit.level || "وحدة تنظيمية"}</small><strong>{unit.measuredUnit}</strong><span>{unit.mainUnit !== unit.measuredUnit ? unit.mainUnit : activeGroup}</span></span><span className={`maturity-badge ${maturity === "أولي" ? "initial" : maturity === "جزئي" ? "partial" : "advanced"}`}>{maturity}</span><Icon name={isSelected ? "check" : "arrow"} /></button>;
           })}
-          {!filteredUnits.length && <div className="empty-state"><Icon name="search" /><h3>لا توجد وحدات مطابقة</h3><p>جرّب اسمًا آخر أو رمز الوحدة ضمن المجموعة المختارة.</p><button type="button" className="button button-outline" onClick={() => setUnitQuery("")}>مسح البحث</button></div>}
+          {!groupUnits.length && <div className="empty-state"><Icon name="grid" /><h3>لا توجد وحدات في هذه المجموعة</h3><p>اختر مجموعة أخرى لاستكشاف وحداتها.</p></div>}
         </div> : <>
         <div className="chart-hint"><Icon name="info" /><span>اضغط على أي وحدة لتحليلها. يمكنك تمرير الهيكل أفقيًا أو استخدام عرض القائمة.</span></div>
         <div className="org-chart-scroll" tabIndex={0} role="region" aria-label={`الهيكل التنظيمي لـ ${activeGroup}`}>
@@ -621,9 +617,9 @@ export default function Home() {
                             <div className="checkpoint-code"><b>{row.checkpointCode}</b><span>{unit?.measuredUnit || row.subUnit}</span></div>
                             <div className="checkpoint-copy"><strong>{row.checkpointText}</strong>{row.notes && <p>{row.notes}</p>}{row.provider && <small>الجهة المزودة: {row.provider}</small>}</div>
                             <div className="checkpoint-value">
-                              <div><small>الحالي</small><b>{row.verification.toFixed(0)}%</b></div>
-                              <div className="checkpoint-target"><small>مستهدف 2026</small><b>{roundedPercentage(row.target2026)}%</b></div>
-                              <span>{row.status || maturityLabel(row.verification, data.thresholds)}</span>
+                              <div><small>الحالي</small><b>{row.verification === null ? "NA" : `${row.verification.toFixed(0)}%`}</b></div>
+                              <div className="checkpoint-target"><small>مستهدف 2026</small><b>{row.target2026 === null ? "—" : `${roundedPercentage(row.target2026)}%`}</b></div>
+                              <span>{row.verification === null ? "لا يقاس (NA)" : row.status || maturityLabel(row.verification, data.thresholds)}</span>
                             </div>
                           </article>
                         );
